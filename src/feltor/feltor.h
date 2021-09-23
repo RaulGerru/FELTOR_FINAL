@@ -1221,7 +1221,7 @@ void Explicit<Geometry, IMatrix, Matrix, Container>::compute_parallel(
         m_faST( dg::geo::einsPlus,  m_temp0, m_plus);
         m_faST( dg::geo::zeroMinus, m_temp0, m_minus);
         update_parallel_bc_1st( m_minus, m_plus, dg::NEU, 0.);
-        dg::geo::ds_slope( m_faST, -0.5, m_minus, m_plus, 1, yp[1][1]);
+        dg::geo::ds_slope( m_faST, -0.5, m_minus, m_plus, 1, yp[1][i]);
 
         // Add density gradient and electric field
         double tau = m_p.tau[i], mu = m_p.mu[i];
@@ -1474,11 +1474,11 @@ void Explicit<Geometry, IMatrix, Matrix, Container>::operator()(
     //Compute m_densityST, m_dsN and m_potentialST, m_dsP
     update_staggered_density_and_phi( t, m_density, m_potential);
 
-    // Now refine potential on staggered grid
-    // set m_potentialST[0]
-    compute_phi( t, m_densityST, m_potentialST[0], true);
-    // set m_potentialST[1]  --- needs m_potentialST[0]
-    compute_psi( t, m_potentialST[0], m_potentialST[1], true);
+    //// Now refine potential on staggered grid
+    //// set m_potentialST[0]
+    //compute_phi( t, m_densityST, m_potentialST[0], true);
+    //// set m_potentialST[1]  --- needs m_potentialST[0]
+    //compute_psi( t, m_potentialST[0], m_potentialST[1], true);
     timer.toc();
     accu += timer.diff();
     DG_RANK0 std::cout << "## Compute phi and psi 2nd           took "
