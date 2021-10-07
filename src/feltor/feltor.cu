@@ -201,7 +201,8 @@ int main( int argc, char* argv[])
     /// /////////////The initial field//////////////////////////////////////////
     double time = 0.;
     std::array<std::array<dg::x::DVec,2>,2> y0;
-    std::array<dg::x::DVec, 3> gradPsip;
+    dg::geo::Nablas<class Geometry, class Matrix, class Container> nabla(grid, p, mag);
+    std::array<dg::x::DVec, 3> gradPsip, tmp, tmp2, tmp3;
     gradPsip[0] =  dg::evaluate( mag.psipR(), grid);
     gradPsip[1] =  dg::evaluate( mag.psipZ(), grid);
     gradPsip[2] =  dg::evaluate( dg::zero, grid); //zero
