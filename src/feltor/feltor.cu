@@ -17,8 +17,16 @@
 #include "dg/file/file.h"
 #include "feltor.h"
 #include "init.h"
-#include "feltordiag.h"
+#include "feltordiag_vorticity.h"
 #include "init_from_file.h"
+
+using HVec = dg::x::HVec;
+using DVec = dg::x::DVec;
+using DMatrix = dg::x::DMatrix;
+using IDMatrix = dg::x::IDMatrix;
+using IHMatrix = dg::x::IHMatrix;
+//using Geometry = dg::x::CylindricalGrid3d;
+
 
 #ifdef WITH_MPI
 //ATTENTION: in slurm should be used with --signal=SIGINT@30 (<signal>@<time in seconds>)
@@ -201,13 +209,14 @@ int main( int argc, char* argv[])
     /// /////////////The initial field//////////////////////////////////////////
     double time = 0.;
     std::array<std::array<dg::x::DVec,2>,2> y0;
-    dg::geo::Nablas<class Geometry, class Matrix, class Container> nabla(grid, p, mag);
-    std::array<dg::x::DVec, 3> gradPsip, tmp, tmp2, tmp3;
+    dg::geo::Nablas<dg::x::CylindricalGrid3d, dg::x::DVec, dg::x::DMatrix> nabla(grid, p, mag);
+    //dg::geo::Nablas<dg::x::CylindricalGrid3d, dg::x::DMatrix, dg::x::HVec> nabla(grid, p, mag);
+    std::array<dg::x::DVec, 3> gradPsip;
     gradPsip[0] =  dg::evaluate( mag.psipR(), grid);
     gradPsip[1] =  dg::evaluate( mag.psipZ(), grid);
     gradPsip[2] =  dg::evaluate( dg::zero, grid); //zero
     feltor::Variables var{
-        feltor, y0, p, mag, nabla, gradPsip, tmp, tmp2, tmp3,
+        feltor, y0, p, mag, nabla, gradPsip, gradPsip, gradPsip, gradPsip,
         dg::construct<dg::x::DVec>( dg::pullback( dg::geo::Hoo(mag),grid)),
         0., // duration
         0 // nfailed

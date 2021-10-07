@@ -225,9 +225,9 @@ struct Nablas
 	*/
 	private:
 	Geometry m_g;
+	feltor::Parameters m_p;
 	dg::geo::TokamakMagneticField m_mag;
     dg::SparseTensor<Container > m_metric, m_hh;
-    feltor::Parameters m_p;
     bool m_reversed_field;
 	Matrix m_dR;
 	Matrix m_dZ;
