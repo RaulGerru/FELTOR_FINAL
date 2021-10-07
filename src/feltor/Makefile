@@ -7,10 +7,14 @@ include ../../config/devices/devices.mk
 
 INCLUDE+= -I../         # other src libraries
 INCLUDE+= -I../../inc   # other project libraries
+//INCLUDE+= -L /home/raulgerru/anaconda3/lib #ONLY IN RAUL'S LAPTOP
 
 all: feltor feltor_hpc feltor_mpi manufactured manufactured_perp manufactured_para feltordiag interpolate_in_3d
 
 feltordiag: feltordiag.cu feltordiag.h
+	$(CC) $(OPT) $(CFLAGS) $< -o $@ $(INCLUDE) $(LIBS) $(JSONLIB) -g
+
+feltordiag_vorticity: feltordiag_vorticity.cu feltordiag_vorticity.h
 	$(CC) $(OPT) $(CFLAGS) $< -o $@ $(INCLUDE) $(LIBS) $(JSONLIB) -g
 
 interpolate_in_3d: interpolate_in_3d.cu feltordiag.h
