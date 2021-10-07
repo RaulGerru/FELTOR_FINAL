@@ -206,7 +206,7 @@ int main( int argc, char* argv[])
     gradPsip[1] =  dg::evaluate( mag.psipZ(), grid);
     gradPsip[2] =  dg::evaluate( dg::zero, grid); //zero
     feltor::Variables var{
-        feltor, y0, p, mag, gradPsip, gradPsip,
+        feltor, y0, p, mag, nabla, gradPsip, tmp, tmp2, tmp3,
         dg::construct<dg::x::DVec>( dg::pullback( dg::geo::Hoo(mag),grid)),
         0., // duration
         0 // nfailed
