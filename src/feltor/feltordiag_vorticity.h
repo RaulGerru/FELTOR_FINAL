@@ -1431,7 +1431,7 @@ std::vector<Record> diagnostics2d_list = {
 	     dg::blas1::pointwiseDot( v.f.density(1), v.tmp[0], v.tmp[0]);	     
          dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);
          dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);         
-         routines::dot(v.tmp[0], v.gradPsip, v.tmp2);
+         routines::scal(v.tmp[0], v.gradPsip, v.tmp2);
          //dg::blas1::copy(dg::geo::SquareNorm(v.gradPsip, v.gradPsip), v.tmp[1]);
          //dg::blas1::pointwiseDivide(v.tmp[0], v.tmp[1], v.tmp[0]);  //ACTIVATE IF DEVIDE BY GRAD PSIP norm
          //dg::blas1::pointwiseDivide(v.tmp[0], v.tmp[1], v.tmp[0]);  //ACTIVATE IF DEVIDE BY GRAD PSIP norm
@@ -1444,7 +1444,7 @@ std::vector<Record> diagnostics2d_list = {
 	     dg::blas1::pointwiseDot( v.f.density(1), v.tmp[0], v.tmp[0]);	     
          dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);
          dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);        
-         routines::dot(v.tmp[0], v.gradPsip, v.tmp2);
+         routines::scal(v.tmp[0], v.gradPsip, v.tmp2);
          //dg::blas1::copy(dg::geo::SquareNorm(v.gradPsip, v.gradPsip), v.tmp[1]);
          //dg::blas1::pointwiseDivide(v.tmp[0], v.tmp[1], v.tmp[0]);  //ACTIVATE IF DEVIDE BY GRAD PSIP norm
          //dg::blas1::pointwiseDivide(v.tmp[0], v.tmp[1], v.tmp[0]);  //ACTIVATE IF DEVIDE BY GRAD PSIP norm
@@ -1455,7 +1455,7 @@ std::vector<Record> diagnostics2d_list = {
     {"v_vort_D", "Diamagnetic vorticity (as time derivative)", false, 
         []( dg::x::DVec& result, Variables& v) {         
              dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::dot(v.tmp2[0], v.f.gradN(1), v.tmp); //grad(Ni)/B^2             
+             routines::scal(v.tmp2[0], v.f.gradN(1), v.tmp); //grad(Ni)/B^2             
              //dg::tensor::multiply3d(v.f.projection(), v.tmp[0], v.tmp[1],v.tmp[2], v.tmp[0], v.tmp[1], v.tmp[2]); //CHECK DIVERGENCES AND COVARIANCE AND CONTRAVARIANCE //DIV USE
              v.nabla.div(v.tmp[0], v.tmp[1], result); //TO BE DEFINED 
              dg::blas1::scal(result, v.p.tau[1]);
@@ -1464,7 +1464,7 @@ std::vector<Record> diagnostics2d_list = {
      {"v_vort_D_tt", "Diamagnetic vorticity (time integrated)", true,
         []( dg::x::DVec& result, Variables& v) {         
              dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::dot(v.tmp2[0], v.f.gradN(1), v.tmp); //grad(Ni)/B^2             
+             routines::scal(v.tmp2[0], v.f.gradN(1), v.tmp); //grad(Ni)/B^2             
              //dg::tensor::multiply2d(v.f.projection(), v.tmp[0], v.tmp[1],v.tmp[2], v.tmp[0], v.tmp[1], v.tmp[2]); //CHECK DIVERGENCES AND COVARIANCE AND CONTRAVARIANCE //DIV USE
              v.nabla.div(v.tmp[0], v.tmp[1], result); //TO BE DEFINED 
              dg::blas1::scal(result, v.p.tau[1]);
@@ -1476,7 +1476,7 @@ std::vector<Record> diagnostics2d_list = {
 	     routines::dot(v.f.gradN(1), v.gradPsip, v.tmp[0]);
 	     dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);
 	     dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);     
-         routines::dot(v.tmp[0], v.gradPsip, v.tmp2);
+         routines::scal(v.tmp[0], v.gradPsip, v.tmp2);
          //dg::blas1::copy(dg::geo::SquareNorm(v.gradPsip, v.gradPsip), v.tmp[1]);
 	     //dg::blas1::pointwiseDivide(result, v.tmp[1], result); //CHANGE: ACTIVATE WHEN WE NOW HOW TO WORK WITH NORM GRAD Psi_P
 	     //dg::blas1::pointwiseDivide(result, v.tmp[1], result); //CHANGE: ACTIVATE WHEN WE NOW HOW TO WORK WITH NORM GRAD Psi_P
@@ -1489,7 +1489,7 @@ std::vector<Record> diagnostics2d_list = {
 	     routines::dot(v.f.gradN(1), v.gradPsip, v.tmp[0]);
 	     dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);
 	     dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);     
-         routines::dot(v.tmp[0], v.gradPsip, v.tmp2);
+         routines::scal(v.tmp[0], v.gradPsip, v.tmp2);
          //dg::blas1::copy(dg::geo::SquareNorm(v.gradPsip, v.gradPsip), v.tmp[1]);
 	     //dg::blas1::pointwiseDivide(result, v.tmp[1], result); //CHANGE: ACTIVATE WHEN WE NOW HOW TO WORK WITH NORM GRAD Psi_P
 	     //dg::blas1::pointwiseDivide(result, v.tmp[1], result); //CHANGE: ACTIVATE WHEN WE NOW HOW TO WORK WITH NORM GRAD Psi_P
@@ -1509,11 +1509,11 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(1), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::dot(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2
              
              //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::dot(result, v.tmp, v.tmp3);
+             routines::scal(result, v.tmp, v.tmp3);
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
              dg::blas1::axpby(1,v.tmp2[0], 1, v.tmp[0]);
@@ -1527,11 +1527,11 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(1), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::dot(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2
              
              //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::dot(result, v.tmp, v.tmp);
+             routines::scal(result, v.tmp, v.tmp);
              //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp[0], v.tmp[1], result);
         }
@@ -1540,11 +1540,11 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::dot(v.tmp2[0], v.f.gradN(1), v.tmp2); //Grad_N_i/B^2
+             routines::scal(v.tmp2[0], v.f.gradN(1), v.tmp2); //Grad_N_i/B^2
              
              //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::dot(result, v.tmp, v.tmp3);
+             routines::scal(result, v.tmp, v.tmp3);
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
              dg::blas1::axpby(1,v.tmp2[0], 1, v.tmp[0]);
@@ -1558,11 +1558,11 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::dot(v.tmp2[0], v.f.gradN(1), v.tmp2); //Grad_N_i/B^2
+             routines::scal(v.tmp2[0], v.f.gradN(1), v.tmp2); //Grad_N_i/B^2
              
              //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::dot(result, v.tmp, v.tmp3);
+             routines::scal(result, v.tmp, v.tmp3);
              //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp[0], v.tmp[1], result);
              dg::blas1::scal(result, v.p.tau[1]);              
@@ -1575,18 +1575,18 @@ std::vector<Record> diagnostics2d_list = {
     ///J_b_perp TERMS
     {"v_M_em_tt", "Magnetization term (time integrated)", true, //FINAL checked
         []( dg::x::DVec& result, Variables& v) {     
-			 routines::dot(v.f.velocity(1), v.f.gradN(1), v.tmp);
-			 routines::dot(v.f.density(1), v.f.gradU(1), v.tmp2);
+			 routines::scal(v.f.velocity(1), v.f.gradN(1), v.tmp);
+			 routines::scal(v.f.density(1), v.f.gradU(1), v.tmp2);
              dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
              dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::dot(v.f.binv(), v.tmp2, v.tmp2);
-             routines::dot(v.f.binv(), v.tmp2, v.tmp2); //M^em
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em
              
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
          
              //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::dot(result, v.tmp, v.tmp3);
+             routines::scal(result, v.tmp, v.tmp3);
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
              dg::blas1::axpby(1,v.tmp2[0], 1, v.tmp[0]);
@@ -1598,18 +1598,18 @@ std::vector<Record> diagnostics2d_list = {
     },
     {"v_J_mag_tt", "Magnetization current term (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-             routines::dot(v.f.velocity(1), v.f.gradN(1), v.tmp);
-			 routines::dot(v.f.density(1), v.f.gradU(1), v.tmp2);
+             routines::scal(v.f.velocity(1), v.f.gradN(1), v.tmp);
+			 routines::scal(v.f.density(1), v.f.gradU(1), v.tmp2);
              dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
              dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::dot(v.f.binv(), v.tmp2, v.tmp2);
-             routines::dot(v.f.binv(), v.tmp2, v.tmp2); //M^em
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em
              
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
          
              //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::dot(result, v.tmp, v.tmp);
+             routines::scal(result, v.tmp, v.tmp);
              //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp[0], v.tmp[1], result);
              dg::blas1::scal(result, v.p.tau[1]);     
@@ -1623,7 +1623,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::pointwiseDot(v.f.density(1), v.f.velocity(1), v.tmp[2]);
              dg::blas1::pointwiseDot(-1., v.f.density(0), v.f.velocity(0), 1., v.tmp[2]);
              dg::blas1::copy(v.tmp[2], v.tmp2[0]); //J_||
-             routines::dot(v.tmp2[0], v.tmp, v.tmp);
+             routines::scal(v.tmp2[0], v.tmp, v.tmp);
 			 //dg::tensor::multiply2d(v.f.projection(), v.tmp3[0], v.tmp3[1], v.tmp3[0], v.tmp3[1]); //to transform the vector from covariant to contravariant      //DIV USE        
              v.nabla.div(v.tmp[0], v.tmp[1], result); 
                     
@@ -1694,7 +1694,7 @@ std::vector<Record> diagnostics2d_list = {
 	    dg::blas1::pointwiseDot(v.f.density(1), v.f.velocity(1), v.tmp[0]);
             dg::blas1::pointwiseDot(-1., v.f.density(0), v.f.velocity(0), 1., v.tmp[0]); //J_||
             dg::blas1::pointwiseDot(v.f.aparallel(), v.tmp[0], v.tmp[0]); 
-            routines::dot(v.tmp[0], v.f.curvKappa(), v.tmp);
+            routines::scal(v.tmp[0], v.f.curvKappa(), v.tmp);
             v.nabla.div(v.tmp[0], v.tmp[1], result);           
         }
     },    
@@ -1707,7 +1707,7 @@ std::vector<Record> diagnostics2d_list = {
         dg::blas1::scal(v.tmp[0], v.p.mu[0]);
         dg::blas1::scal(v.tmp[1], v.p.mu[1]);
         dg::blas1::axpby(1.0, v.tmp[0], -1.0, v.tmp[1]);
-        routines::dot(v.tmp[1], v.f.curvKappa(), v.tmp);
+        routines::scal(v.tmp[1], v.f.curvKappa(), v.tmp);
         v.nabla.div(v.tmp[0], v.tmp[1], result);       
         }
     },
@@ -1720,8 +1720,8 @@ std::vector<Record> diagnostics2d_list = {
     {"v_S_E_tt", "Electric source vorticity (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
 			routines::dot(v.f.density_source(1), v.f.gradP(0), v.tmp); 
-			routines::dot(v.f.binv(), v.tmp, v.tmp); 
-			routines::dot(v.f.binv(), v.tmp, v.tmp); 
+			routines::scal(v.f.binv(), v.tmp, v.tmp); 
+			routines::scal(v.f.binv(), v.tmp, v.tmp); 
             //dg::tensor::multiply2d(v.f.projection(), v.tmp[0], v.tmp[1], v.tmp[0], v.tmp[1]); //to transform the vector from covariant to contravariant    
             v.nabla.div(v.tmp[0], v.tmp[1], result);       
         }
@@ -1729,8 +1729,8 @@ std::vector<Record> diagnostics2d_list = {
     {"v_S_D_tt", "Diamagnetic source vorticity (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
              v.f.compute_gradSN(0,  v.tmp); 
-			 routines::dot(v.f.binv(), v.tmp, v.tmp); 
-			 routines::dot(v.f.binv(), v.tmp, v.tmp); 
+			 routines::scal(v.f.binv(), v.tmp, v.tmp); 
+			 routines::scal(v.f.binv(), v.tmp, v.tmp); 
              //dg::tensor::multiply2d(v.f.projection(), v.tmp[0], v.tmp[1], v.tmp[0], v.tmp[1]); //to transform the vector from covariant to contravariant             
              v.nabla.div(v.tmp[0], v.tmp[1], result);
              dg::blas1::scal(result, v.p.tau[1]);      
