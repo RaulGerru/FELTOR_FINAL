@@ -195,14 +195,14 @@ void jacobian(
         a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]);
 }
 
-struct projection{
+struct scal_projection{
     DG_DEVICE void operator()(
-        const double d0P, const double d1P, const double d2P, //any three vectors
-        const double d0S, const double d1S, const double d2S,
+         double d0P, double d1P, double d2P, //any three vectors
+         double d0S, double d1S, double d2S,
         double& c)
     {	m_temp=d0S*d0S+d1S*d1S+d2S*d2S;
 		dg::blas1::transform( m_temp, m_temp, dg::SQRT<double>());
-        c = (d0p*d0S+d1p*d1S+d2p*d2S)/m_temp;
+        c = (d0P*d0S+d1P*d1S+d2P*d2S)/m_temp;
     }
     private:
     double m_temp;
@@ -210,27 +210,40 @@ struct projection{
 
 template<class Container>
 void radial_project_scal(
-          const std::array<Container, 3>& a,
-          const std::array<Container, 3>& b,
-          double& c,
+          std::array<Container, 3>& a,
+          std::array<Container, 3>& b,
+          double& c
           )
 {
-    dg::blas1::evaluate( result, dg::equals(), projection(),
-        a[0], a[1], a[2], b[0], b[1], b[2], c;
+    dg::blas1::evaluate( c, dg::equals(), scal_projection(),
+        a[0], a[1], a[2], b[0], b[1], b[2]);
 }
+
+struct vec_projection{
+    DG_DEVICE void operator()(
+         double d0P, double d1P, double d2P, //any three vectors
+         double d0S, double d1S, double d2S,
+        double& c0, double& c1, double& c2)
+    {	m_norm=d0S*d0S+d1S*d1S+d2S*d2S;
+		dg::blas1::transform( m_norm, m_norm, dg::SQRT<double>());
+        m_proj = (d0P*d0S+d1P*d1S+d2P*d2S)/m_norm;
+        c0=m_proj*d0S/m_norm;
+        c1=m_proj*d1S/m_norm;
+        c2=m_proj*d2S/m_norm;
+    }
+    private:
+    double m_norm, m_proj;
+};
+
+template<class Container>
 void radial_project_vec(
-          const std::array<Container, 3>& a,
+          std::array<Container, 3>& a,
           const std::array<Container, 3>& b,
-          std::array<Container, 3>& c,
+          std::array<Container, 3>& c
           )
-{	double module, r_module;
-	r_module=b[0]*b[0]+b[1]*b[1]+b[2]*b[2];
-	dg::blas1::transform( r_module, r_module, dg::SQRT<double>())
-    dg::blas1::evaluate( result, dg::equals(), projection(),
-        a[0], a[1], a[2], b[0], b[1], b[2], module);
-    c[0]=module*b[0]/r_module;
-    c[1]=module*b[1]/r_module;
-    c[2]=module*b[2]/r_module;
+{	dg::blas1::subroutine(vec_projection(),
+        a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]);
+
     
 }
 
@@ -1453,7 +1466,6 @@ std::vector<Record> diagnostics2d_list = {
 			 dg::blas1::pointwiseDot(v.f.density(1), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp); //Ni grad(phi)/B^2            
-             //dg::tensor::multiply3d(v.f.projection(), v.tmp[0], v.tmp[1],v.tmp[2], v.tmp[0], v.tmp[1], v.tmp[2]); //CHECK DIVERGENCES AND COVARIANCE AND CONTRAVARIANCE //DIV USE
              v.nabla.div(v.tmp[0], v.tmp[1], result);
         }
     },
@@ -1461,67 +1473,52 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {
              dg::blas1::pointwiseDot(v.f.density(1), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::dot(v.tmp2[0], v.f.gradP(0), v.tmp); //Ni grad(phi)/B^2             
-             //dg::tensor::multiply3d(v.f.projection(), v.tmp[0], v.tmp[1],v.tmp[2], v.tmp[0], v.tmp[1], v.tmp[2]); //CHECK DIVERGENCES AND COVARIANCE AND CONTRAVARIANCE //DIV USE
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp); //Ni grad(phi)/B^2             
              v.nabla.div(v.tmp[0], v.tmp[1], result); 
         }
     },
 
     {"v_vort_E_r", "Electric vorticity (as time derivative)-radial part", false, //DISCUSSION RADIAL PROJECTION and divergence
         []( dg::x::DVec& result, Variables& v) {
-	     routines::dot(v.f.gradP(0), v.gradPsip, v.tmp[0]);
-	     dg::blas1::pointwiseDot( v.f.density(1), v.tmp[0], v.tmp[0]);	     
-         dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);
-         dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);         
-         routines::scal(v.tmp[0], v.gradPsip, v.tmp2);
-         //dg::blas1::copy(dg::geo::SquareNorm(v.gradPsip, v.gradPsip), v.tmp[1]);
-         //dg::blas1::pointwiseDivide(v.tmp[0], v.tmp[1], v.tmp[0]);  //ACTIVATE IF DEVIDE BY GRAD PSIP norm
-         //dg::blas1::pointwiseDivide(v.tmp[0], v.tmp[1], v.tmp[0]);  //ACTIVATE IF DEVIDE BY GRAD PSIP norm
+	     routines::scal( v.f.density(1), v.f.gradP(0), v.tmp);	     
+         routines::scal(v.f.binv(), v.tmp, v.tmp);
+         routines::scal(v.f.binv(), v.tmp, v.tmp);
+         routines::radial_project_vec(v.tmp, v.tmp3, v.tmp2);
          v.nabla.div(v.tmp2[0], v.tmp2[1], result); 		 
         }
     },
     {"v_vort_E_r_tt", "Electric vorticity (time integrated)-radial part", true, //CHECK WITH MATTHIAS
         []( dg::x::DVec& result, Variables& v) {
-	     routines::dot(v.f.gradP(0), v.gradPsip, v.tmp[0]);
-	     dg::blas1::pointwiseDot( v.f.density(1), v.tmp[0], v.tmp[0]);	     
-         dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);
-         dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);        
-         routines::scal(v.tmp[0], v.gradPsip, v.tmp2);
-         //dg::blas1::copy(dg::geo::SquareNorm(v.gradPsip, v.gradPsip), v.tmp[1]);
-         //dg::blas1::pointwiseDivide(v.tmp[0], v.tmp[1], v.tmp[0]);  //ACTIVATE IF DEVIDE BY GRAD PSIP norm
-         //dg::blas1::pointwiseDivide(v.tmp[0], v.tmp[1], v.tmp[0]);  //ACTIVATE IF DEVIDE BY GRAD PSIP norm
+	     routines::scal( v.f.density(1), v.f.gradP(0), v.tmp);	     
+         routines::scal(v.f.binv(), v.tmp, v.tmp);
+         routines::scal(v.f.binv(), v.tmp, v.tmp);         
+         routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp2);
          v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
         }
     },
 
     {"v_vort_D", "Diamagnetic vorticity (as time derivative)", false, 
         []( dg::x::DVec& result, Variables& v) {         
-             dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(1), v.tmp); //grad(Ni)/B^2             
-             //dg::tensor::multiply3d(v.f.projection(), v.tmp[0], v.tmp[1],v.tmp[2], v.tmp[0], v.tmp[1], v.tmp[2]); //CHECK DIVERGENCES AND COVARIANCE AND CONTRAVARIANCE //DIV USE
-             v.nabla.div(v.tmp[0], v.tmp[1], result); //TO BE DEFINED 
-             dg::blas1::scal(result, v.p.tau[1]);
+         dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
+         routines::scal(v.tmp2[0], v.f.gradN(1), v.tmp); //grad(Ni)/B^2             
+         v.nabla.div(v.tmp[0], v.tmp[1], result); //TO BE DEFINED 
+         dg::blas1::scal(result, v.p.tau[1]);
         }
     },
      {"v_vort_D_tt", "Diamagnetic vorticity (time integrated)", true,
         []( dg::x::DVec& result, Variables& v) {         
-             dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(1), v.tmp); //grad(Ni)/B^2             
-             //dg::tensor::multiply2d(v.f.projection(), v.tmp[0], v.tmp[1],v.tmp[2], v.tmp[0], v.tmp[1], v.tmp[2]); //CHECK DIVERGENCES AND COVARIANCE AND CONTRAVARIANCE //DIV USE
-             v.nabla.div(v.tmp[0], v.tmp[1], result); //TO BE DEFINED 
-             dg::blas1::scal(result, v.p.tau[1]);
+         dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
+         routines::scal(v.tmp2[0], v.f.gradN(1), v.tmp); //grad(Ni)/B^2             
+         v.nabla.div(v.tmp[0], v.tmp[1], result); //TO BE DEFINED 
+         dg::blas1::scal(result, v.p.tau[1]);
 		}
     },
 
    {"v_vort_D_r", "Diamagnetic vorticity (as time derivative)-radial part", false, //CHECK WITH MATTHIAS
-        []( dg::x::DVec& result, Variables& v) {
-	     routines::dot(v.f.gradN(1), v.gradPsip, v.tmp[0]);
-	     dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);
-	     dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);     
-         routines::scal(v.tmp[0], v.gradPsip, v.tmp2);
-         //dg::blas1::copy(dg::geo::SquareNorm(v.gradPsip, v.gradPsip), v.tmp[1]);
-	     //dg::blas1::pointwiseDivide(result, v.tmp[1], result); //CHANGE: ACTIVATE WHEN WE NOW HOW TO WORK WITH NORM GRAD Psi_P
-	     //dg::blas1::pointwiseDivide(result, v.tmp[1], result); //CHANGE: ACTIVATE WHEN WE NOW HOW TO WORK WITH NORM GRAD Psi_P
+        []( dg::x::DVec& result, Variables& v) {     
+         routines::scal(v.f.binv(), v.f.gradN(1), v.tmp);
+         routines::scal(v.f.binv(), v.tmp, v.tmp);         
+         routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp2);
 	     v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
          dg::blas1::scal(result, v.p.tau[1]);
         }
@@ -1532,9 +1529,6 @@ std::vector<Record> diagnostics2d_list = {
 	     dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);
 	     dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);     
          routines::scal(v.tmp[0], v.gradPsip, v.tmp2);
-         //dg::blas1::copy(dg::geo::SquareNorm(v.gradPsip, v.gradPsip), v.tmp[1]);
-	     //dg::blas1::pointwiseDivide(result, v.tmp[1], result); //CHANGE: ACTIVATE WHEN WE NOW HOW TO WORK WITH NORM GRAD Psi_P
-	     //dg::blas1::pointwiseDivide(result, v.tmp[1], result); //CHANGE: ACTIVATE WHEN WE NOW HOW TO WORK WITH NORM GRAD Psi_P
 	     v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
          dg::blas1::scal(result, v.p.tau[1]);
         }
@@ -1761,7 +1755,7 @@ std::vector<Record> diagnostics2d_list = {
     ///SOURCES TERMS
     {"v_S_E_tt", "Electric source vorticity (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-			routines::dot(v.f.density_source(1), v.f.gradP(0), v.tmp); 
+			routines::scal(v.f.density_source(1), v.f.gradP(0), v.tmp); 
 			routines::scal(v.f.binv(), v.tmp, v.tmp); 
 			routines::scal(v.f.binv(), v.tmp, v.tmp); 
             //dg::tensor::multiply2d(v.f.projection(), v.tmp[0], v.tmp[1], v.tmp[0], v.tmp[1]); //to transform the vector from covariant to contravariant    
