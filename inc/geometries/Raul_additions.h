@@ -177,7 +177,7 @@ struct Nablas
      */
 	
 	template<class Container1>		
-	void div (Container1& v_R, Container1& v_Z, Container1& F){ //INPUT: CONTRAVARIANT
+	void div (const Container1& v_R, const Container1& v_Z, Container1& F){ //INPUT: CONTRAVARIANT
 	dg::blas1::pointwiseDivide(v_R, m_vol, m_tmp);
 	dg::blas1::pointwiseDivide(v_Z, m_vol, m_tmp2); 
 	dg::blas2::symv( m_dR, m_tmp, m_tmp3); 
@@ -197,7 +197,7 @@ struct Nablas
      */
 
 	template<class Container1>
-	void v_dot_nabla_f (Container1& v_R, Container1& v_Z, Container1& f, Container1& F){ //INPUT: COVARIANT
+	void v_dot_nabla_f (const Container1& v_R, const Container1& v_Z, const Container1& f, Container1& F){ //INPUT: COVARIANT
 	dg::blas2::symv( m_dR, f, m_tmp);
 	dg::blas2::symv( m_dZ, f, m_tmp2);
 	dg::tensor::multiply2d(m_hh, m_tmp, m_tmp2, m_tmp3, m_tmp4); //WE MAKE THE GRADIENT CONTRAVARIANT

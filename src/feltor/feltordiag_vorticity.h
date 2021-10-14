@@ -124,7 +124,7 @@ struct Dot{
 };
 
 template<class Container>
-void dot( const Container& lambda,
+void scal( const Container& lambda,
           const std::array<Container, 3>& a,
           std::array<Container, 3>& c)
 {
@@ -1410,7 +1410,7 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {
 			 dg::blas1::pointwiseDot(v.f.density(1), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::dot(v.tmp2[0], v.f.gradP(0), v.tmp); //Ni grad(phi)/B^2            
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp); //Ni grad(phi)/B^2            
              //dg::tensor::multiply3d(v.f.projection(), v.tmp[0], v.tmp[1],v.tmp[2], v.tmp[0], v.tmp[1], v.tmp[2]); //CHECK DIVERGENCES AND COVARIANCE AND CONTRAVARIANCE //DIV USE
              v.nabla.div(v.tmp[0], v.tmp[1], result);
         }
