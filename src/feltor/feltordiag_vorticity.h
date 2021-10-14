@@ -194,6 +194,48 @@ void jacobian(
     dg::blas1::evaluate( result, dg::equals(), Jacobian(),
         a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]);
 }
+
+struct projection{
+    DG_DEVICE void operator()(
+        const double d0P, const double d1P, const double d2P, //any three vectors
+        const double d0S, const double d1S, const double d2S,
+        double& c)
+    {	m_temp=d0S*d0S+d1S*d1S+d2S*d2S;
+		dg::blas1::transform( m_temp, m_temp, dg::SQRT<double>());
+        c = (d0p*d0S+d1p*d1S+d2p*d2S)/m_temp;
+    }
+    private:
+    double m_temp;
+};
+
+template<class Container>
+void radial_project_scal(
+          const std::array<Container, 3>& a,
+          const std::array<Container, 3>& b,
+          double& c,
+          )
+{
+    dg::blas1::evaluate( result, dg::equals(), projection(),
+        a[0], a[1], a[2], b[0], b[1], b[2], c;
+}
+void radial_project_vec(
+          const std::array<Container, 3>& a,
+          const std::array<Container, 3>& b,
+          std::array<Container, 3>& c,
+          )
+{	double module, r_module;
+	r_module=b[0]*b[0]+b[1]*b[1]+b[2]*b[2];
+	dg::blas1::transform( r_module, r_module, dg::SQRT<double>())
+    dg::blas1::evaluate( result, dg::equals(), projection(),
+        a[0], a[1], a[2], b[0], b[1], b[2], module);
+    c[0]=module*b[0]/r_module;
+    c[1]=module*b[1]/r_module;
+    c[2]=module*b[2]/r_module;
+    
+}
+
+
+
 }//namespace routines
 
 //From here on, we use the typedefs to ease the notation
