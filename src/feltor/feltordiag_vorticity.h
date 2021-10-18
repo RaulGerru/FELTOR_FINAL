@@ -200,9 +200,13 @@ struct scal_projection{
          double d0P, double d1P, double d2P, //any three vectors
          double d0S, double d1S, double d2S,
          double& c)
-    {	m_temp=d0S*d0S+d1S*d1S+d2S*d2S;
-		dg::blas1::transform( m_temp, m_temp, dg::SQRT<double>());
-        c = (d0P*d0S+d1P*d1S+d2P*d2S)/m_temp;
+    {	m_temp=sqrt(d0S*d0S+d1S*d1S+d2S*d2S);
+		//dg::blas1::transform( m_temp, m_temp, dg::SQRT<double>());
+        c = (d0P*d0S+d1P*d1S+d2P*d2S);
+        if m_temp<1e-14
+			c=0.;
+		else 
+			c=c/m_temp;
     }
     private:
     double m_temp;
@@ -223,12 +227,17 @@ struct vec_projection{
          double d0P, double d1P, double d2P, //any three vectors
          double d0S, double d1S, double d2S,
         double& c0, double& c1, double& c2)
-    {	m_norm=d0S*d0S+d1S*d1S+d2S*d2S;
-		dg::blas1::transform( m_norm, m_norm, dg::SQRT<double>());
-        m_proj = (d0P*d0S+d1P*d1S+d2P*d2S)/m_norm;
-        c0=m_proj*d0S/m_norm;
-        c1=m_proj*d1S/m_norm;
-        c2=m_proj*d2S/m_norm;
+    {	m_norm=sqrt(d0S*d0S+d1S*d1S+d2S*d2S); //EDIT IT WITH CONDITION NAN
+        if m_norm<1e-14
+			c0=c1=c2=0.;
+		else 
+		{
+			m_proj = (d0P*d0S+d1P*d1S+d2P*d2S)/m_norm;
+			c0=m_proj*d0S/m_norm;
+			c1=m_proj*d1S/m_norm;
+			c2=m_proj*d2S/m_norm;
+        }
+        
     }
     private:
     double m_norm, m_proj;
@@ -1900,7 +1909,7 @@ std::vector<Record> diagnostics2d_list = {
             dg::blas1::pointwiseDot(result, v.f.binv(), result);
         }
     },
-     {"u_D_pol_tt", "Diamagnetic velocity in poloidal direction", true,
+    {"u_D_pol_tt", "Diamagnetic velocity in poloidal direction", true,
         []( dg::x::DVec& result, Variables& v){
             routines::dot( v.f.gradN(0), v.gradPsip, result);
             dg::blas1::pointwiseDivide(result, v.f.density(1), result);
