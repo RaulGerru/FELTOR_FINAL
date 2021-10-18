@@ -6,6 +6,7 @@ include ../../config/*.mk
 include ../../config/devices/devices.mk
 
 INCLUDE+= -I../../inc   # other project libraries
+INCLUDE+= -L /home/raulgerru/anaconda3/lib #ONLY IN RAUL'S LAPTOP
 
 CUFILES=$(wildcard *.cu)
 
