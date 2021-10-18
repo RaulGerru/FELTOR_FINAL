@@ -1900,7 +1900,7 @@ std::vector<Record> diagnostics2d_list = {
         }
     },       
     /// ------------------------ Velocity terms ---------------------------//
-    {"u_E_pol_tt", "ExB velocity in poloidal direction", true,
+    {"u_E_tor_tt", "ExB velocity in poloidal direction", true,
         []( dg::x::DVec& result, Variables& v){
             routines::dot( v.f.gradP(0), v.gradPsip, result);
             dg::blas1::pointwiseDot( 1., result, v.f.binv(), v.f.binv(), 0., result);
@@ -1913,7 +1913,7 @@ std::vector<Record> diagnostics2d_list = {
             dg::blas1::pointwiseDot(result, v.f.binv(), result);
         }
     },
-    {"u_D_pol_tt", "Diamagnetic velocity in poloidal direction", true,
+    {"u_D_tor_tt", "Diamagnetic velocity in poloidal direction", true,
         []( dg::x::DVec& result, Variables& v){
             routines::dot( v.f.gradN(0), v.gradPsip, result);
             dg::blas1::pointwiseDivide(result, v.f.density(1), result);
@@ -1930,7 +1930,7 @@ std::vector<Record> diagnostics2d_list = {
             dg::blas1::pointwiseDot(result, v.p.tau[1], result);
         }
     },  
-    {"u_C_r_tt", "Curvature velocity in radial direction", true,
+    {"u_C_tor_tt", "Curvature velocity in toroidal direction", true,
         []( dg::x::DVec& result, Variables& v){
             routines::dot( v.f.curvKappa(), v.gradPsip, result);
             dg::blas1::pointwiseDot( 1., result, v.f.binv(), v.f.binv(), 0., result);
@@ -1938,7 +1938,7 @@ std::vector<Record> diagnostics2d_list = {
             dg::blas1::pointwiseDot(result, v.p.mu[1], result);
         }
     },
-    {"u_C_tt", "ExB velocity module", true,
+    {"u_C_tt", "Curvature velocity module", true,
         []( dg::x::DVec& result, Variables& v){
             routines::dot( v.f.curvKappa(), v.f.curvKappa(), result);
             dg::blas1::transform( result, result, dg::SQRT<double>());
