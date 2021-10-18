@@ -203,10 +203,13 @@ struct scal_projection{
     {	m_temp=sqrt(d0S*d0S+d1S*d1S+d2S*d2S);
 		//dg::blas1::transform( m_temp, m_temp, dg::SQRT<double>());
         c = (d0P*d0S+d1P*d1S+d2P*d2S);
-        if m_temp<1e-14
+        if (m_temp<1e-14){
 			c=0.;
+		}
 		else 
+		{
 			c=c/m_temp;
+		}
     }
     private:
     double m_temp;
@@ -228,8 +231,9 @@ struct vec_projection{
          double d0S, double d1S, double d2S,
         double& c0, double& c1, double& c2)
     {	m_norm=sqrt(d0S*d0S+d1S*d1S+d2S*d2S); //EDIT IT WITH CONDITION NAN
-        if m_norm<1e-14
+        if (m_norm<1e-14) {
 			c0=c1=c2=0.;
+		}
 		else 
 		{
 			m_proj = (d0P*d0S+d1P*d1S+d2P*d2S)/m_norm;
