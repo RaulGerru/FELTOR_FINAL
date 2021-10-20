@@ -1208,7 +1208,7 @@ std::vector<Record> diagnostics2d_list = {
 			dg::blas1::axpby(1.,1., -1., result);
 			dg::blas1::transform(result, result, dg::SQRT<double>());//btheta
 			dg::blas1::pointwiseDot( 1., v.f.density(1), v.f.velocity(1), result, 0., result);    
-			/*
+			
             dg::blas1::pointwiseDot( 1., v.f.density(1), v.f.velocity(1), v.f.bphi(), 0., result);
             dg::blas1::pointwiseDot(result, result, result);
             dg::blas1::pointwiseDot(v.f.density(1), v.f.velocity(1), v.tmp[0]);
