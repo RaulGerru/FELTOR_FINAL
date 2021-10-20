@@ -1218,8 +1218,6 @@ std::vector<Record> diagnostics2d_list = {
                       
         }
     },
-    */
-    /*
     /// --------------------- Parallel momentum flux terms ---------------------//
     {"jsparexbi_tt", "Parallel momentum radial flux by ExB velocity with electron potential (Time average)", true,
         []( dg::x::DVec& result, Variables& v){
