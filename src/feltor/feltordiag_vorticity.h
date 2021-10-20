@@ -201,7 +201,6 @@ struct scal_projection{
          double d0S, double d1S, double d2S,
          double& c)
     {	m_temp=sqrt(d0S*d0S+d1S*d1S+d2S*d2S);
-		//dg::blas1::transform( m_temp, m_temp, dg::SQRT<double>());
         c = (d0P*d0S+d1P*d1S+d2P*d2S);
         if (m_temp<1e-14){
 			c=0.;
@@ -1202,6 +1201,7 @@ std::vector<Record> diagnostics2d_list = {
                 v.f.density(1), v.f.velocity(1), v.f.bphi(), 0., result);
         }
     },
+    /*
     {"niuibtheta", "Product of NiUi and covariant theta component of magnetic field unit vector", false,
         []( dg::x::DVec& result, Variables& v ) {
 			dg::blas1::pointwiseDot(v.f.bphi(), v.f.bphi(), result);
@@ -1215,9 +1215,10 @@ std::vector<Record> diagnostics2d_list = {
             dg::blas1::pointwiseDot(v.tmp[0], v.tmp[0], v.tmp[0])
             dg::blas1::axpby(1,v.tmp2[0], -1, result);
             dg::blas1::copy(dg::geo::SquareNorm(result, result), v.tmp[1]);     
-           */           
+                      
         }
     },
+    */
     /*
     /// --------------------- Parallel momentum flux terms ---------------------//
     {"jsparexbi_tt", "Parallel momentum radial flux by ExB velocity with electron potential (Time average)", true,
