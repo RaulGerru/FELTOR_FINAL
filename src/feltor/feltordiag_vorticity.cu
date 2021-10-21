@@ -128,7 +128,6 @@ int main( int argc, char* argv[])
     dg::HVec transfer1d = dg::evaluate(dg::zero,g1d_out);
 
     /// ------------------- Compute 1d flux labels ---------------------//
-
     std::vector<std::tuple<std::string, dg::HVec, std::string> > map1d;
     /// Compute flux volume label
     dg::Average<dg::HVec > poloidal_average( gridX2d, dg::coo2d::y);
@@ -190,15 +189,13 @@ int main( int argc, char* argv[])
     dg::blas1::transform( psit, psit, dg::SQRT<double>());
     map1d.emplace_back("rho_t", psit,
         "Toroidal flux label rho_t = sqrt( psit/psit_tot)");
-
     //-----------------Create Netcdf output file with attributes----------//
     //-----------------And 1d static output                     ----------//
     int ncid_out;
     err = nc_create(argv[argc-1],NC_NETCDF4|NC_NOCLOBBER, &ncid_out);
-
     /// Set global attributes
     std::map<std::string, std::string> att;
-    att["title"] = "Output file of feltor/src/feltor/feltordiag.cu";
+    att["title"] = "Output file of feltor/src/feltor/feltordiag_vorticity.cu";
     att["Conventions"] = "CF-1.7";
     ///Get local time and begin file history
     auto ttt = std::time(nullptr);
@@ -251,7 +248,7 @@ int main( int argc, char* argv[])
     //although the first point outside LCFS is still wrong
     
     /// ------------------- NEW:Partial FSA and CONVOLUTION elements ---------------------//
-    double radial_cut_point=0.; //NEW: Psi position for Radial cut where we get the poloidal distribution in 1D  
+    double radial_cut_point=((0.-psipO)/(psipmax - psipO))*(gridX2d.x1()/(gridX2d.x1()-gridX2d.x0())); //NEW: Psi position for Radial cut where we get the poloidal distribution in 1D  
     dg::Grid1d g1d_out_eta(gridX2d.y0(), gridX2d.y1(), 3, Neta, dg::DIR_NEU); ////NEW 1D grid for the eta (poloidal) directions instead of psi for the radial cut
     dg::HVec LCFS_1d=dg::evaluate( dg::zero, g1d_out_eta);//NEW: 1D eta data saved
     
@@ -363,7 +360,6 @@ int main( int argc, char* argv[])
             &id1d[name]);
         err = nc_put_att_text( ncid_out, id1d[name], "long_name", long_name.size(),
             long_name.data());    
-		*/
 
         name = record_name + "_ifs";
         long_name = record.long_name + " (wrt. vol integrated flux surface average)";
@@ -391,6 +387,7 @@ int main( int argc, char* argv[])
             &id0d[name]);
         err = nc_put_att_text( ncid_out, id0d[name], "long_name", long_name.size(),
             long_name.data());
+            */
     }
     std::cout << "Construct Fieldaligned derivative ... \n";
 
@@ -537,7 +534,7 @@ int main( int argc, char* argv[])
                     dg::blas1::axpby( 1.0, t2d_mp, -1.0, transferH2d);
                     err = nc_put_vara_double( ncid_out, id2d.at(record_name+"_fluc2d"),
                         start2d_out, count2d, transferH2d.data() );
-
+	
                     //5. flux surface integral/derivative
                     double result =0.;
                     if( record_name[0] == 'j') //j indicates a flux
@@ -554,11 +551,13 @@ int main( int argc, char* argv[])
 
                         result = dg::interpolate( dg::xspace, transfer1d, -1e-12, g1d_out); //make sure to take inner cell for interpolation
                     }
+                    /*
                     err = nc_put_vara_double( ncid_out, id1d.at(record_name+"_ifs"),
                         start1d_out, count1d, transfer1d.data());
                     //flux surface integral/derivative on last closed flux surface
                     err = nc_put_vara_double( ncid_out, id0d.at(record_name+"_ifs_lcfs"),
                         start2d_out, count2d, &result );
+                        */
                     //6. Compute norm of time-integral terms to get relative importance
                     if( record_name[0] == 'j') //j indicates a flux
                     {
@@ -579,8 +578,10 @@ int main( int argc, char* argv[])
                         result = dg::interpolate( dg::xspace, transfer1d, -1e-12, g1d_out);
                         result = sqrt(result);
                     }
+                    /*
                     err = nc_put_vara_double( ncid_out, id0d.at(record_name+"_ifs_norm"),
                         start2d_out, count2d, &result );
+                        */
                     //7. Compute midplane fluctuation amplitudes
                     dg::blas1::pointwiseDot( transferH2d, transferH2d, transferH2d);
                     dg::blas2::symv( grid2gridX2d, transferH2d, transferH2dX); //interpolate onto X-point grid
@@ -602,15 +603,16 @@ int main( int argc, char* argv[])
                 {
                     dg::blas1::scal( transferH2d, 0.);
                     dg::blas1::scal( transfer1d, 0.);
-                    double result = 0.;
                     err = nc_put_vara_double( ncid_out, id2d.at(record_name+"_fluc2d"),
                         start2d_out, count2d, transferH2d.data() );
+                    /*
                     err = nc_put_vara_double( ncid_out, id1d.at(record_name+"_ifs"),
                         start1d_out, count1d, transfer1d.data());
                     err = nc_put_vara_double( ncid_out, id0d.at(record_name+"_ifs_lcfs"),
                         start2d_out, count2d, &result );
                     err = nc_put_vara_double( ncid_out, id0d.at(record_name+"_ifs_norm"),
                         start2d_out, count2d, &result );
+                        */
                     err = nc_put_vara_double( ncid_out, id1d.at(record_name+"_std_fsa"),
                         start1d_out, count1d, transfer1d.data());
                 }
