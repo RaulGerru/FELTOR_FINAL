@@ -256,10 +256,10 @@ int main( int argc, char* argv[])
 	///---------------- End of FSA and CONVOLUTION definitions ---------------------///
 
 	///----------PARTIAL FSA SECTION (commented just in case we want to activate it at some point)--------------//
-	//double eta_0=0.; //NEW: Defining center of partial fsa
-    //double eta_range=30.; //NEW: Defining the poloidal range of partial fsa 
-	//dg::HVec part_t1d(t1d), part_fsa1d(t1d), part_volX2d(volX2d), part_transferH2dX(volX2d);
-	//dg::blas1::pointwiseDot(part_volX2d, dg::evaluate(dg::geo::Grid_cutter(eta_0, eta_range), gridX2d.grid()), part_volX2d); //NEW: Define the cutted grid por the partial fsa
+	double eta_0=M_PI/2; //NEW: Defining center of partial fsa
+    double eta_range=15.; //NEW: Defining the poloidal range of partial fsa 
+	dg::HVec part_t1d(t1d), part_fsa1d(t1d), part_volX2d(volX2d), part_transferH2dX(volX2d);
+	dg::blas1::pointwiseDot(part_volX2d, dg::evaluate(dg::geo::Grid_cutter(eta_0, eta_range), gridX2d), part_volX2d); //NEW: Define the cutted grid por the partial fsa
 	
 	///---------- END PARTIAL FSA SECTION (commented just in case we want to activate it at some point)--------------//
 	
@@ -353,14 +353,14 @@ int main( int argc, char* argv[])
         err = nc_put_att_text( ncid_out, id1d_pol[name], "long_name", long_name.size(),
             long_name.data());
             
-        /*
+        
          name = record_name + "_part_fsa_at_"+std::to_string(180*eta_0/M_PI)+"_"+std::to_string(eta_range); //NEW partial fsa at the position defined
         long_name = record.long_name + " (Partial Flux surface average.)";
         err = nc_def_var( ncid_out, name.data(), NC_DOUBLE, 2, dim_ids2d,
             &id1d[name]);
         err = nc_put_att_text( ncid_out, id1d[name], "long_name", long_name.size(),
             long_name.data());    
-
+		/*
         name = record_name + "_ifs";
         long_name = record.long_name + " (wrt. vol integrated flux surface average)";
         if( record_name[0] == 'j')
@@ -463,6 +463,7 @@ int main( int argc, char* argv[])
                     else
                         dg::blas2::symv( grid2gridX2d, transferH2d, transferH2dX); //interpolate simple average onto X-point grid
                     realtransferH2dX=transferH2dX; //NEW: Define the data matrices that we are going to edit for the partial fsa and the convolution                    
+                    part_transferH2dX=transferH2dX;
                     LCFS_1d=cutter.cut(transferH2dX, radial_cut_point);//NEW	                    
                     dg::blas1::pointwiseDot( transferH2dX, volX2d, transferH2dX); //multiply by sqrt(g)
                     try{
@@ -475,17 +476,19 @@ int main( int argc, char* argv[])
                     dg::blas1::scal( t1d, 4*M_PI*M_PI*f0); //
                     dg::blas1::copy( 0., fsa1d); //get rid of previous nan in fsa1d (nasty bug)
                     
-                    //dg::blas1::pointwiseDot( part_transferH2dX, part_volX2d, part_transferH2dX);  //NEW:  
-                    //poloidal_average( part_transferH2dX, part_t1d, false);//NEW
-                    //dg::blas1::scal( part_t1d, 4*M_PI*M_PI*f0); //NEW
-                    //dg::blas1::scal(part_t1d, 360/eta_range); //NEW: Normalization factor (explained in feltor.pdf)
+                    dg::blas1::pointwiseDot( part_transferH2dX, part_volX2d, part_transferH2dX);  //NEW:  
+                    poloidal_average( part_transferH2dX, part_t1d, false);//NEW
+                    dg::blas1::scal( part_t1d, 4*M_PI*M_PI*f0); //NEW
+                    dg::blas1::scal(part_t1d, 360/eta_range); //NEW: Normalization factor (explained in feltor.pdf)
                     
                     if( record_name[0] != 'j')
-                        dg::blas1::pointwiseDivide( t1d, dvdpsip, fsa1d );
-                        //dg::blas1::pointwiseDivide( part_t1d, dvdpsip, part_fsa1d ); //NEW: Add braquet for if if activated
+                        {dg::blas1::pointwiseDivide( t1d, dvdpsip, fsa1d );
+                        dg::blas1::pointwiseDivide( part_t1d, dvdpsip, part_fsa1d );
+                        } //NEW: Add braquet for if if activated
                     else
-                        dg::blas1::copy( t1d, fsa1d);
-                        //dg::blas1::copy( part_t1d, part_fsa1d); #Add braquet for else if activated
+                        {dg::blas1::copy( t1d, fsa1d);
+                        dg::blas1::copy( part_t1d, part_fsa1d); //Add braquet for else if activated
+					}
                     //3. Interpolate fsa on 2d plane : <f>
                     dg::blas2::gemv(fsa2rzmatrix, fsa1d, transferH2d); //fsa on RZ grid
                 }
@@ -499,8 +502,8 @@ int main( int argc, char* argv[])
                     start1d_out, count1d, fsa1d.data());
                 err = nc_put_vara_double( ncid_out, id2d.at(record_name+"_fsa2d"),
                     start2d_out, count2d, transferH2d.data() );
-                //err = nc_put_vara_double( ncid_out, id1d.at(record_name+"_part_fsa_at_"+std::to_string(180*eta_0/M_PI)+"_"+std::to_string(eta_range)),
-                //    start1d_out, count1d, part_fsa1d.data()); //NEW: Save the partial fsa data
+                err = nc_put_vara_double( ncid_out, id1d.at(record_name+"_part_fsa_at_"+std::to_string(180*eta_0/M_PI)+"_"+std::to_string(eta_range)),
+                    start1d_out, count1d, part_fsa1d.data()); //NEW: Save the partial fsa data
                 err = nc_put_vara_double( ncid_out, id1d_pol.at(record_name+"_LCFS"), //NEW
 					start1d_out, count1d_pol, LCFS_1d.data() ); 
 				err = nc_put_vara_double( ncid_out, id2dX.at(record_name+"_2dX"), //NEW: saving de X_grid data

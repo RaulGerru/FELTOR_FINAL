@@ -13,9 +13,10 @@ namespace geo
 {
 ///@addtogroup fluxfunctions
 
-/*
+
 struct Grid_cutter : public aCylindricalFunctor<Grid_cutter>
 {
+		/**
     * @brief Cuts a 2D X-grid from a certain central poloidal position (horizontal line in the X-grid) to a range around it (a width in the y direction around the center). 
     *
     * \f[ f(zeta,eta)= \begin{cases}
@@ -32,7 +33,7 @@ struct Grid_cutter : public aCylindricalFunctor<Grid_cutter>
     * @param eta_size (width of the poloidal range you want to cut, in degrees)
     * 
     * @note How to use it? dg::evaluate(dg::geo::Grid_cutter(eta, Range), GridX2d()); After you have it, you usually pointwise this function to a matrix of data to apply the cut to your data: dg::blas1::pointwiseDot(data, dg::evaluate(dg::geo::Grid_cutter(eta, Range), GridX2d()), cutted_data);
-
+	**/
 	
 
     Grid_cutter(double eta_0, double eta_size): eta0(eta_0), etasize(eta_size){} //eta_0 is in radians and eta_size is in degrees
@@ -65,7 +66,7 @@ struct Grid_cutter : public aCylindricalFunctor<Grid_cutter>
     private:
     double eta0, etasize;
 }; 
-*/
+
 
 struct radial_cut
 {
@@ -91,7 +92,7 @@ struct radial_cut
 	{m_conv_LCFS_F[eta]=F[eta*m_g.n()*m_g.Nx()+zeta_cut];};
 	return m_conv_LCFS_F;	
 	}
-/*	
+	
 	HVec cut2(const HVec F, const double zeta_min, const double zeta_max){ //This functions takes a 2D object in the Xgrid plane and cuts it between the two introduced Zetas
 	dg::Grid1d g1d_out_eta(m_g.y0(), m_g.y1(), m_g.n(), m_g.Ny(), dg::DIR_NEU); 
 	m_conv_LCFS_F=dg::evaluate( dg::zero, g1d_out_eta);
@@ -103,7 +104,7 @@ struct radial_cut
 	{m_conv_LCFS_F[eta+(zeta-zeta_min_in)*m_g.n()*m_g.Nx()]=F[eta*m_g.n()*m_g.Nx()+zeta];};
 	return m_conv_LCFS_F;	
 	}
-	*/
+	
 	private:
 	RealCurvilinearGrid2d<double> m_g; //Changed from curvilinearGridX2d because it didn't compile	
 	HVec m_conv_LCFS_F;
