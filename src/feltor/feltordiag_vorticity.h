@@ -1568,6 +1568,31 @@ std::vector<Record> diagnostics2d_list = {
              v.nabla.div(v.tmp[0], v.tmp[1], result);
         }
     },
+    {"v_adv_E_alt_tt", "Alternative electric advective term (time integrated)", true, 
+        []( dg::x::DVec& result, Variables& v) {            
+			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
+			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2     
+			 v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E
+             v.nabla.div(v.tmp[0], v.tmp[1], result);
+        }
+    },
+    {"v_adv_E_alt_r_tt", "Electric advective term (time integrated)", true, 
+        []( dg::x::DVec& result, Variables& v) {
+			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
+			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //ne Grad_phi/B^2
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E        
+             routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp);
+             v.nabla.div(v.tmp[0], v.tmp[1], result);
+        }
+    },
+    
+    
     {"v_adv_D_tt", "Diamagnetic advective term (time integrated)", true,
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
@@ -1610,17 +1635,6 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::scal(result, v.p.tau[1]);              
         }
     },
-        {"v_adv_D_alt_tt", "Alternative diamagnetic term (time integrated)", true, 
-        []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
-			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); //Grad_N_i/B^2       
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
-             v.nabla.div(v.tmp3[0], v.tmp3[1], result);
-             dg::blas1::scal(result, v.p.tau[1]);              
-        }
-    },
     {"v_adv_D_main_r_tt", "Main diamagnetic term in radial direction (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
@@ -1633,21 +1647,34 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::scal(result, v.p.tau[1]);              
         }
     }, 
+    {"v_adv_D_alt_tt", "Alternative diamagnetic term (time integrated)", true, 
+        []( dg::x::DVec& result, Variables& v) {            
+			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
+             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); //Grad_N_i/B^2       
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result);
+             dg::blas1::scal(result, v.p.tau[1]);              
+        }
+    },
+    {"v_adv_D_alt_r_tt", "Alternative diamagnetic term (time integrated)", true, 
+        []( dg::x::DVec& result, Variables& v) {            
+			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
+             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); //Grad_N_i/B^2       
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
+             routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp3);    
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result);
+             dg::blas1::scal(result, v.p.tau[1]);              
+        }
+    },
+    
     
  
 	///EXTRA TERMS TO TEST ADVECTION
-	{"adv_wE_nabla_UE_r_tt", "Electric advective term (time integrated)", true, 
-        []( dg::x::DVec& result, Variables& v) {
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
-			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
-			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //ne Grad_phi/B^2
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E     
-             routines::radial_project_scal(v.tmp, v.gradPsip, result);
-        }
-    },   
-    {"adv_wE_nabla_UE_tt", "Electric advective term (time integrated)", true, 
+	{"adv_wE_nabla_UE_tt", "Electric advective term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
@@ -1659,38 +1686,15 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::transform( result, result, dg::SQRT<double>());
         }
     },
-    {"v_adv_E_alt_r_tt", "Electric advective term (time integrated)", true, 
+	{"adv_wE_nabla_UE_r_tt", "Electric advective term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //ne Grad_phi/B^2
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E        
-             routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp);
-             v.nabla.div(v.tmp[0], v.tmp[1], result);
-        }
-    },
-    {"v_adv_E_alt_tt", "Alternative electric advective term (time integrated)", true, 
-        []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
-			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
-			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2     
-			 v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E
-             v.nabla.div(v.tmp[0], v.tmp[1], result);
-        }
-    },
-    {"adv_WE_UE_r_tt", "Main electric advective term (time integrated)", true, 
-        []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
-			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
-			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2   
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::scal(result, v.tmp, v.tmp);  
-			 routines::radial_project_scal(v.tmp, v.gradPsip, result);
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E     
+             routines::radial_project_scal(v.tmp, v.gradPsip, result);
         }
     },
     {"adv_WE_UE_tt", "Main electric advective term (time integrated)", true, 
@@ -1704,8 +1708,8 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::dot(v.tmp, v.tmp, result);
              dg::blas1::transform( result, result, dg::SQRT<double>());
         }
-    },
-    {"adv_div_WE_UE_r_tt", "Main electric advective term (time integrated)", true, 
+    },       
+    {"adv_WE_UE_r_tt", "Main electric advective term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
@@ -1713,8 +1717,7 @@ std::vector<Record> diagnostics2d_list = {
              routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2   
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
              routines::scal(result, v.tmp, v.tmp);  
-			 routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp);
-			 v.nabla.div(v.tmp[0], v.tmp[1], result);
+			 routines::radial_project_scal(v.tmp, v.gradPsip, result);
         }
     },
     
@@ -1746,27 +1749,6 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::transform( result, result, dg::SQRT<double>());
         }
     },
-    {"v_adv_D_alt_r_tt", "Electric advective term (time integrated)", true, 
-        []( dg::x::DVec& result, Variables& v) {
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
-			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); // GradN/B^2
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E        
-             routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp);
-             v.nabla.div(v.tmp[0], v.tmp[1], result);
-        }
-    },
-    {"v_adv_D_alt_tt", "Alternative electric advective term (time integrated)", true, 
-        []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
-			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); // GradN/B^2
-			 v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E
-             v.nabla.div(v.tmp[0], v.tmp[1], result);
-        }
-    },
     {"adv_WD_UE_r_tt", "Main electric advective term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
@@ -1786,17 +1768,6 @@ std::vector<Record> diagnostics2d_list = {
              routines::scal(result, v.tmp, v.tmp);  
 			 routines::dot(v.tmp, v.tmp, result);
              dg::blas1::transform( result, result, dg::SQRT<double>());
-        }
-    },
-    {"adv_div_WD_UE_r_tt", "Main electric advective term (time integrated)", true, 
-        []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
-			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); // GradN/B^2
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::scal(result, v.tmp, v.tmp);  
-			 routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp);
-			 v.nabla.div(v.tmp[0], v.tmp[1], result);
         }
     },
     
@@ -2040,6 +2011,42 @@ std::vector<Record> diagnostics2d_list = {
 			dg::blas1::copy(v.f.gradN(0), v.tmp);
 			dg::blas1::scal(v.tmp, v.p.tau[0]);
 			dg::blas1::axpby( v.p.tau[1], v.f.gradN(0), -1.0 , v.tmp);
+			routines::times(v.f.binv(),v.f.bhatgB(), v.tmp, v.tmp);
+			v.nabla.div(v.tmp[0], v.tmp[1], result);
+            
+        }
+    },
+    {"v_J_D_part_straight_tt", "Diamagnetic current (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+		dg::blas1::copy(v.f.gradN(0), v.tmp);
+		dg::blas1::scal(v.tmp, v.p.tau[0]);
+		dg::blas1::axpby( v.p.tau[1], v.f.gradN(0), -1.0 , v.tmp);//Grad(pe+pi)
+        dg::blas1::axpby(1.0, v.tmp[0], -1.0, v.tmp[1]);
+        routines::dot(v.tmp, v.f.curvKappa(), result);            
+        }
+    },
+    {"v_J_D_part_div_tt", "Diamagnetic current (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+		dg::blas1::copy(v.f.density(0), v.tmp[0]);
+		dg::blas1::scal(v.tmp[0], v.p.tau[0]);
+		dg::blas1::axpby( v.p.tau[1], v.f.density(0), -1.0 , v.tmp[0]);//(pe+pi)
+        routines::scal(v.tmp[0], v.f.curvKappa(), v.tmp);   
+        v.nabla.div(v.tmp[0], v.tmp[1], result);         
+        }
+    },
+    {"v_J_D_i_tt", "Diamagnetic current (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+			dg::blas1::copy(v.f.gradN(0), v.tmp);
+			dg::blas1::scal(v.tmp, v.p.tau[1]);
+			routines::times(v.f.binv(),v.f.bhatgB(), v.tmp, v.tmp);
+			v.nabla.div(v.tmp[0], v.tmp[1], result);
+            
+        }
+    },
+    {"v_J_D_e_tt", "Diamagnetic current (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+			dg::blas1::copy(v.f.gradN(0), v.tmp);
+			dg::blas1::scal(v.tmp, v.p.tau[0]);
 			routines::times(v.f.binv(),v.f.bhatgB(), v.tmp, v.tmp);
 			v.nabla.div(v.tmp[0], v.tmp[1], result);
             
