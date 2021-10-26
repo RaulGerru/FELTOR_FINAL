@@ -1829,6 +1829,21 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::scal(result, v.p.tau[1]);     
         }
     },
+    {"v_M_em_main_tt", "Magnetization term (time integrated)", true, 
+        []( dg::x::DVec& result, Variables& v) {     
+			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
+			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
+             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
+             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
+             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
+             routines::scal(result, v.tmp, v.tmp3); 
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result);
+             dg::blas1::scal(result, v.p.tau[1]);     
+        }
+    },
     {"v_M_em_r_tt", "Magnetization term in radial direction (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {     
 			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
@@ -1849,6 +1864,71 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::scal(result, v.p.tau[1]);     
         }
     },
+    {"v_M_em_main_r_tt", "Magnetization term (time integrated)", true, 
+        []( dg::x::DVec& result, Variables& v) {     
+			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
+			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
+             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
+             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
+             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
+             routines::scal(result, v.tmp, v.tmp3);
+             routines::radial_project_vec(v.tmp3, v.gradPsip, v.tmp); 
+             v.nabla.div(v.tmp[0], v.tmp[1], result);
+             dg::blas1::scal(result, v.p.tau[1]);     
+        }
+    },
+    
+    {"test_div_M_em_nabla_b_tt", "Magnetization term (time integrated)", true, 
+        []( dg::x::DVec& result, Variables& v) {     
+			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
+			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
+             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
+             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E  
+             v.nabla.div(v.tmp[0], v.tmp[1], result);
+             dg::blas1::scal(result, v.p.tau[1]);     
+        }
+    },
+    {"test_M_em_nabla_b_r_tt", "Magnetization term (time integrated)", true, 
+        []( dg::x::DVec& result, Variables& v) {     
+			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
+			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
+             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
+             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E  
+             routines::radial_project_scal(v.tmp, v.gradPsip, result); 
+             dg::blas1::scal(result, v.p.tau[1]);     
+        }
+    },
+    {"test_M_em_nabla_b_tt", "Magnetization term (time integrated)", true, 
+        []( dg::x::DVec& result, Variables& v) {     
+			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
+			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
+             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
+             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E  
+             routines::dot(v.tmp, v.tmp, result);
+             dg::blas1::transform( result, result, dg::SQRT<double>());
+             dg::blas1::scal(result, v.p.tau[1]);     
+        }
+    },
+    
+    
     {"v_J_mag_tt", "Magnetization current term (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
              routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
