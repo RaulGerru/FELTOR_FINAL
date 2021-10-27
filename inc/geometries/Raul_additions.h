@@ -202,9 +202,9 @@ struct Nablas
 	dg::blas2::symv( m_dR, f, m_tmp);
 	dg::blas2::symv( m_dZ, f, m_tmp2);
 	//dg::tensor::multiply2d(m_hh, m_tmp, m_tmp2, m_tmp3, m_tmp4); //WE MAKE THE GRADIENT CONTRAVARIANT
-	dg::blas1::pointwiseDot(v_R, m_tmp3, m_tmp);
-	dg::blas1::pointwiseDot(v_Z, m_tmp4, F);
-	dg::blas1::axpby(1, m_tmp, 1, F);
+	dg::blas1::pointwiseDot(v_R, m_tmp, m_tmp);
+	dg::blas1::pointwiseDot(v_Z, m_tmp2, F);
+	dg::blas1::axpby(1.0, m_tmp, 1.0, F);
 	}	
 	
 	/*
