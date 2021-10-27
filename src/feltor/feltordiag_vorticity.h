@@ -1519,13 +1519,12 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //ne Grad_phi/B^2
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); //Div(n_e Grad_phi/B^2 )
-             routines::scal(result, v.tmp, v.tmp3);//Div(n_e Grad_phi/B^2 )*u_E
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div(u_E)
-             dg::blas1::axpby(1.0,v.tmp2[0], 1.0, v.tmp[0]);
-             dg::blas1::axpby(1.0,v.tmp2[1], 1.0, v.tmp[1]);//Div(n_e Grad_phi/B^2 )*u_E+  ne grad(phi)/B^2*div(u_E)      
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //ne Grad_phi/B^2
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); //Div(n_e Grad_phi/B^2 )
+             routines::scal(result, v.tmp, v.tmp2);//Div(n_e Grad_phi/B^2 )*u_E
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div(u_E)
+             dg::blas1::axpby(1.0,v.tmp2, 1.0, v.tmp);//Div(n_e Grad_phi/B^2 )*u_E+  ne grad(phi)/B^2*div(u_E)      
              v.nabla.div(v.tmp[0], v.tmp[1], result);//Div(Div(n_e Grad_phi/B^2 )*u_E+  ne grad(phi)/B^2*div(u_E)  )    
         }
     },
@@ -1534,8 +1533,8 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //n_e Grad_phi/B^2   
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); //Div(n_e Grad_phi/B^2 )
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //n_e Grad_phi/B^2   
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); //Div(n_e Grad_phi/B^2 )
              routines::scal(result, v.tmp, v.tmp);  //Div(n_e Grad_phi/B^2 )*u_E
              v.nabla.div(v.tmp[0], v.tmp[1], result);//Div(Div(n_e Grad_phi/B^2 )*u_E)
         }
@@ -1546,9 +1545,9 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2     
-			 v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //N_i Grad_phi/B^2     
+			 v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E
              v.nabla.div(v.tmp[0], v.tmp[1], result);
         }
     },
@@ -1601,13 +1600,12 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); //Grad_N_i/B^2      
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::scal(result, v.tmp, v.tmp3);
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
-             dg::blas1::axpby(1.0,v.tmp2[0], 1.0, v.tmp[0]);
-             dg::blas1::axpby(1.0,v.tmp2[1], 1.0, v.tmp[1]);      
+             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); //Grad_N_i/B^2      
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); 
+             routines::scal(result, v.tmp, v.tmp2);
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
+             dg::blas1::axpby(1.0,v.tmp2, 1.0, v.tmp);     
              v.nabla.div(v.tmp[0], v.tmp[1], result);
              dg::blas1::scal(result, v.p.tau[1]);            
         }
@@ -1616,8 +1614,8 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); //Grad_N_i/B^2       
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
+             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); //Grad_N_i/B^2       
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); 
              routines::scal(result, v.tmp, v.tmp3);       
              v.nabla.div(v.tmp3[0], v.tmp3[1], result);
              dg::blas1::scal(result, v.p.tau[1]);              
@@ -1627,9 +1625,9 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); //Grad n_e/B^2       
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
+             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); //Grad n_e/B^2       
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
              v.nabla.div(v.tmp[0], v.tmp[1], result);
              dg::blas1::scal(result, v.p.tau[1]);              
         }
@@ -1685,9 +1683,9 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //ne Grad_phi/B^2
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E        
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //ne Grad_phi/B^2
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E        
              routines::dot(v.tmp, v.tmp, result);
              dg::blas1::transform( result, result, dg::SQRT<double>());
         }
@@ -1697,9 +1695,9 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //ne Grad_phi/B^2
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E     
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //ne Grad_phi/B^2
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E     
              routines::radial_project_scal(v.tmp, v.gradPsip, result);
         }
     },
@@ -1708,10 +1706,10 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2   
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::scal(result, v.tmp, v.tmp);  
-			 routines::dot(v.tmp, v.tmp, result);
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //N_i Grad_phi/B^2   
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); 
+             routines::scal(result, v.tmp, v.tmp2);  
+			 routines::dot(v.tmp2, v.tmp2, result);
              dg::blas1::transform( result, result, dg::SQRT<double>());
         }
     },       
@@ -1720,10 +1718,10 @@ std::vector<Record> diagnostics2d_list = {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp2); //N_i Grad_phi/B^2   
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::scal(result, v.tmp, v.tmp);  
-			 routines::radial_project_scal(v.tmp, v.gradPsip, result);
+             routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //N_i Grad_phi/B^2   
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); 
+             routines::scal(result, v.tmp, v.tmp2);  
+			 routines::radial_project_scal(v.tmp2, v.gradPsip, result);
         }
     },
     
@@ -1738,9 +1736,9 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); // GradN/B^2
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E     
+             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); // GradN/B^2
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E     
              routines::radial_project_scal(v.tmp, v.gradPsip, result);
         }
     },   
@@ -1748,9 +1746,9 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); // GradN/B^2
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
-             v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E        
+             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); // GradN/B^2
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[0], v.tmp[0]); 
+             v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[1], v.tmp[1]); //ne grad(phi)/B^2*div u_E        
              routines::dot(v.tmp, v.tmp, result);
              dg::blas1::transform( result, result, dg::SQRT<double>());
         }
@@ -1759,20 +1757,20 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); // GradN/B^2
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::scal(result, v.tmp, v.tmp);  
-			 routines::radial_project_scal(v.tmp, v.gradPsip, result);
+             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); // GradN/B^2
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); 
+             routines::scal(result, v.tmp, v.tmp2);  
+			 routines::radial_project_scal(v.tmp2, v.gradPsip, result);
         }
     },
     {"adv_WD_UE_tt", "Main electric advective term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {            
 			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
-             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp2); // GradN/B^2
-             v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::scal(result, v.tmp, v.tmp);  
-			 routines::dot(v.tmp, v.tmp, result);
+             routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); // GradN/B^2
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); 
+             routines::scal(result, v.tmp, v.tmp2);  
+			 routines::dot(v.tmp2, v.tmp2, result);
              dg::blas1::transform( result, result, dg::SQRT<double>());
         }
     },
@@ -1791,17 +1789,15 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {     
 			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
 			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
-             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
-             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             dg::blas1::axpby(1, v.tmp, 1, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp3);
+             routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
              routines::scal(result, v.tmp, v.tmp3);
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E
-             dg::blas1::axpby(1,v.tmp2[0], 1, v.tmp[0]);
-             dg::blas1::axpby(1,v.tmp2[1], 1, v.tmp[1]);     
+             dg::blas1::axpby(1.0,v.tmp3, 1.0, v.tmp);    
              v.nabla.div(v.tmp[0], v.tmp[1], result);
              dg::blas1::scal(result, v.p.tau[1]);     
         }
@@ -1810,10 +1806,9 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {     
 			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
 			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
-             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
-             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             dg::blas1::axpby(1.0, v.tmp, 1.0, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp3);
+             routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
              routines::scal(result, v.tmp, v.tmp3); 
@@ -1825,10 +1820,9 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {     
 			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
 			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
-             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
-             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             dg::blas1::axpby(1.0, v.tmp.0, 1, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp3);
+             routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E     
@@ -1879,10 +1873,9 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {     
 			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
 			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
-             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
-             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             dg::blas1::axpby(1.0, v.tmp, 1.0, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp3);
+             routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E  
@@ -1894,10 +1887,9 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {     
 			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
 			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
-             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
-             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             dg::blas1::axpby(1.0, v.tmp, 1.0, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp3);
+             routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E  
@@ -1910,10 +1902,9 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {     
 			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
 			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
-             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
-             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             dg::blas1::axpby(1.0, v.tmp, 1.0, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp3);
+             routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
              routines::scal(result, v.tmp, v.tmp3); 
@@ -1926,10 +1917,9 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {     
 			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
 			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
-             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
-             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em             
+             dg::blas1::axpby(1.0, v.tmp, 1.0, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp3);
+             routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
              routines::scal(result, v.tmp, v.tmp3); 
@@ -1943,14 +1933,13 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {
              routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
 			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
-             dg::blas1::axpby(1, v.tmp[0], 1, v.tmp2[0]);
-             dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2);
-             routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em            
+             dg::blas1::axpby(1.0, v.tmp, 1.0, v.tmp2);
+             routines::scal(v.f.binv(), v.tmp2, v.tmp3);
+             routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em            
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp      
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
-             routines::scal(result, v.tmp, v.tmp);       
-             v.nabla.div(v.tmp[0], v.tmp[1], result);
+             routines::scal(result, v.tmp, v.tmp3);       
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result);
              dg::blas1::scal(result, v.p.tau[1]);     
 			 dg::blas1::scal(result, 0.5);
         }
@@ -1977,11 +1966,10 @@ std::vector<Record> diagnostics2d_list = {
     {"v_J_perp_tt", "Perp gradient current term (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp                      
-             dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(1), v.tmp[2]);
-             dg::blas1::pointwiseDot(-1., v.f.density(0), v.f.velocity(0), 1., v.tmp[2]);
-             dg::blas1::copy(v.tmp[2], v.tmp2[0]); //J_||
-             routines::scal(v.tmp2[0], v.tmp, v.tmp);      
-             v.nabla.div(v.tmp[0], v.tmp[1], result); 
+             dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(1), v.tmp2[0]);
+             dg::blas1::pointwiseDot(-1., v.f.density(0), v.f.velocity(0), 1., v.tmp2[0]); //J_||
+             routines::scal(v.tmp2[0], v.tmp, v.tmp3);      
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); 
                     
         }
     },
@@ -2056,60 +2044,54 @@ std::vector<Record> diagnostics2d_list = {
     ///J_curv TERMS
     {"v_J_D_tt", "Diamagnetic current (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-			dg::blas1::copy(v.f.gradN(0), v.tmp);
-			dg::blas1::scal(v.tmp, v.p.tau[0]);
-			dg::blas1::axpby( v.p.tau[1], v.f.gradN(0), -1.0 , v.tmp);
-			routines::times(v.f.binv(),v.f.bhatgB(), v.tmp, v.tmp);
+			routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradN(0), v.tmp);
 			v.nabla.div(v.tmp[0], v.tmp[1], result);
+			dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);
             
         }
     },
-    {"v_J_D_kappa_nablaNdotK_tt", "Diamagnetic current (time integrated)", true, //FINAL
+    {"v_J_D_kappa_nablaNdotK_tt", "Diamagnetic current (time integrated)", true, //FINAL (STRAIGHT)
         []( dg::x::DVec& result, Variables& v) {
-		dg::blas1::copy(v.f.gradN(0), v.tmp);
-		dg::blas1::scal(v.tmp, v.p.tau[0]);
-		dg::blas1::axpby( v.p.tau[1], v.f.gradN(0), -1.0 , v.tmp);//Grad(pe+pi)
-        dg::blas1::axpby(1.0, v.tmp[0], -1.0, v.tmp[1]);
-        routines::dot(v.tmp, v.f.curvKappa(), result);            
+        routines::dot(v.f.gradN(0), v.f.curvKappa(), result); 
+        dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);           
         }
     },
-    {"v_J_D_kappa_divNK_tt", "Diamagnetic current (time integrated)", true, //FINAL
+    {"v_J_D_kappa_divNK_tt", "Diamagnetic current (time integrated)", true, //FINAL (PART_DIV)
         []( dg::x::DVec& result, Variables& v) {
-		dg::blas1::copy(v.f.density(0), v.tmp[0]);
-		dg::blas1::scal(v.tmp[0], v.p.tau[0]);
-		dg::blas1::axpby( v.p.tau[1], v.f.density(0), -1.0 , v.tmp[0]);//(pe+pi)
-        routines::scal(v.tmp[0], v.f.curvKappa(), v.tmp);   
-        v.nabla.div(v.tmp[0], v.tmp[1], result);         
+        routines::scal(v.f.density(0), v.f.curvKappa(), v.tmp);   
+        v.nabla.div(v.tmp[0], v.tmp[1], result);
+        dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);           
+        }
+    },
+    {"v_J_D_divNK_tt", "Diamagnetic current (time integrated)", true, //FINAL (PART_DIV)
+        []( dg::x::DVec& result, Variables& v) {
+        routines::scal(v.f.density(0), v.f.curv(), v.tmp);   
+        v.nabla.div(v.tmp[0], v.tmp[1], result);
+        dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);           
         }
     },
     {"v_J_D_gradB_tt", "Diamagnetic current (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-		dg::blas1::copy(v.f.density(0), v.tmp[0]);
-		dg::blas1::scal(v.tmp[0], v.p.tau[0]);
-		dg::blas1::axpby( v.p.tau[1], v.f.density(0), -1.0 , v.tmp[0]);//(pe+pi)
-		dg::blas1::axpby(1.0, v.f.curv(), -1.0, v.f.curvKappa(), v.tmp2);
-        routines::scal(v.tmp[0], v.tmp2, v.tmp);   
-        v.nabla.div(v.tmp[0], v.tmp[1], result);         
+		dg::blas1::axpby(1.0, v.f.curv(), -1.0, v.f.curvKappa(), v.tmp);
+		routines::scal(v.f.density(0), v.tmp, v.tmp2);   
+        v.nabla.div(v.tmp2[0], v.tmp2[1], result);
+        dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);         
         }
     },
     {"v_J_D_i_tt", "Diamagnetic current (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-			dg::blas1::copy(v.f.gradN(0), v.tmp);
-			dg::blas1::scal(v.tmp, v.p.tau[1]);
-			routines::times(v.f.binv(),v.f.bhatgB(), v.tmp, v.tmp);
+			routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradN(0), v.tmp);
 			v.nabla.div(v.tmp[0], v.tmp[1], result);
+			dg::blas1::scal(result, v.p.tau[1]);
             
         }
     },
     {"v_J_D_r_tt", "Diamagnetic current in radial direction(time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-			dg::blas1::copy(v.f.gradN(0), v.tmp);
-			dg::blas1::scal(v.tmp, v.p.tau[0]);
-			dg::blas1::axpby( v.p.tau[1], v.f.gradN(0), -1.0 , v.tmp);
-			routines::times(v.f.binv(),v.f.bhatgB(), v.tmp, v.tmp);
-			routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp);    
-			v.nabla.div(v.tmp[0], v.tmp[1], result);
-            
+			routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradN(0), v.tmp);
+			routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp2);    
+			v.nabla.div(v.tmp2[0], v.tmp2[1], result);
+			dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);
         }
     },
     
@@ -2119,8 +2101,8 @@ std::vector<Record> diagnostics2d_list = {
 	    dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(1), v.tmp[0]);
             dg::blas1::pointwiseDot(-1., v.f.density(0), v.f.velocity(0), 1., v.tmp[0]); //J_||
             dg::blas1::pointwiseDot(v.f.aparallel(), v.tmp[0], v.tmp[0]); 
-            routines::scal(v.tmp[0], v.f.curvKappa(), v.tmp);
-            v.nabla.div(v.tmp[0], v.tmp[1], result);           
+            routines::scal(v.tmp[0], v.f.curvKappa(), v.tmp2);
+            v.nabla.div(v.tmp2[0], v.tmp2[1], result);           
         }
     },
     /*
@@ -2143,9 +2125,9 @@ std::vector<Record> diagnostics2d_list = {
         dg::blas1::pointwiseDot(v.f.density(0), v.tmp[1], v.tmp[1]);
         dg::blas1::scal(v.tmp[0], v.p.mu[0]);
         dg::blas1::scal(v.tmp[1], v.p.mu[1]);
-        dg::blas1::axpby(1.0, v.tmp[0], -1.0, v.tmp[1]);
-        routines::scal(v.tmp[1], v.f.curvKappa(), v.tmp);
-        v.nabla.div(v.tmp[0], v.tmp[1], result);       
+        dg::blas1::axpby(1.0, v.tmp[1], -1.0, v.tmp[0]);
+        routines::scal(v.tmp[0], v.f.curvKappa(), v.tmp2);
+        v.nabla.div(v.tmp2[0], v.tmp2[1], result);       
         }
     },
     /*
@@ -2168,16 +2150,16 @@ std::vector<Record> diagnostics2d_list = {
     {"v_S_E_tt", "Electric source vorticity (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
 			routines::scal(v.f.density_source(0), v.f.gradP(0), v.tmp); 
-			routines::scal(v.f.binv(), v.tmp, v.tmp); 
-			routines::scal(v.f.binv(), v.tmp, v.tmp);    
+			routines::scal(v.f.binv(), v.tmp, v.tmp2); 
+			routines::scal(v.f.binv(), v.tmp2, v.tmp);    
             v.nabla.div(v.tmp[0], v.tmp[1], result);       
         }
     },
         {"v_S_D_tt", "Diamagnetic source vorticity (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
              v.f.compute_gradSN(0,  v.tmp); 
-			 routines::scal(v.f.binv(), v.tmp, v.tmp); 
-			 routines::scal(v.f.binv(), v.tmp, v.tmp);             
+			 routines::scal(v.f.binv(), v.tmp, v.tmp2); 
+			 routines::scal(v.f.binv(), v.tmp2, v.tmp);             
              v.nabla.div(v.tmp[0], v.tmp[1], result);
              dg::blas1::scal(result, v.p.tau[1]);      
         }
