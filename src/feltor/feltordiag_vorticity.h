@@ -1820,7 +1820,7 @@ std::vector<Record> diagnostics2d_list = {
         []( dg::x::DVec& result, Variables& v) {     
 			 routines::scal(v.f.velocity(1), v.f.gradN(0), v.tmp);
 			 routines::scal(v.f.density(0), v.f.gradU(1), v.tmp2);
-             dg::blas1::axpby(1.0, v.tmp.0, 1, v.tmp2);
+             dg::blas1::axpby(1.0, v.tmp, 1, v.tmp2);
              routines::scal(v.f.binv(), v.tmp2, v.tmp3);
              routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
              routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
