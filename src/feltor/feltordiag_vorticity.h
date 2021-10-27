@@ -2087,7 +2087,7 @@ std::vector<Record> diagnostics2d_list = {
 		dg::blas1::copy(v.f.density(0), v.tmp[0]);
 		dg::blas1::scal(v.tmp[0], v.p.tau[0]);
 		dg::blas1::axpby( v.p.tau[1], v.f.density(0), -1.0 , v.tmp[0]);//(pe+pi)
-		dg::blas1::axpby(1.0, v.f.curv(), -1.0, v.f.curvKappa(), v.tmp2)
+		dg::blas1::axpby(1.0, v.f.curv(), -1.0, v.f.curvKappa(), v.tmp2);
         routines::scal(v.tmp[0], v.tmp2, v.tmp);   
         v.nabla.div(v.tmp[0], v.tmp[1], result);         
         }
