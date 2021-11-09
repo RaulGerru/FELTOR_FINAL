@@ -1471,7 +1471,7 @@ std::vector<Record> diagnostics2d_list = {
     
     
     ///VORTICITY DEFINITIONS: TIME CHANGE, NOT TIME CHANGE AND RADIAL TERMS
-    {"v_vort_E", "Electric vorticity (as time derivative)", false, 
+    {"v_vort_E", "Electric vorticity", false, 
         []( dg::x::DVec& result, Variables& v) {
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
@@ -1479,7 +1479,7 @@ std::vector<Record> diagnostics2d_list = {
              v.nabla.div(v.tmp[0], v.tmp[1], result);
         }
     },
-    {"v_vort_E_r", "Electric vorticity (as time derivative)-radial part", false, 
+    {"v_vort_E_r", "Electric vorticity-radial part", false, 
         []( dg::x::DVec& result, Variables& v) {
 	     dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 		 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
@@ -1488,7 +1488,7 @@ std::vector<Record> diagnostics2d_list = {
          v.nabla.div(v.tmp2[0], v.tmp2[1], result); 		 
         }
     },
-    {"v_vort_D", "Diamagnetic vorticity (as time derivative)", false, 
+    {"v_vort_D", "Diamagnetic vorticity", false, 
         []( dg::x::DVec& result, Variables& v) {         
          dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
          routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp); //grad(ni)/B^2= grad(ne)/B^2            
@@ -1496,7 +1496,7 @@ std::vector<Record> diagnostics2d_list = {
          dg::blas1::scal(result, v.p.tau[1]);
         }
     },
-    {"v_vort_D_r", "Diamagnetic vorticity (as time derivative)-radial part", false, 
+    {"v_vort_D_r", "Diamagnetic vorticity-radial part", false, 
         []( dg::x::DVec& result, Variables& v) {     
          dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
          routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp); //grad(Ni)/B^2         
@@ -2048,12 +2048,6 @@ std::vector<Record> diagnostics2d_list = {
 			v.nabla.div(v.tmp[0], v.tmp[1], result);
 			dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);
             
-        }
-    },
-    {"v_J_D_kappa_nablaNdotK_tt", "Diamagnetic current (time integrated)", true, //FINAL (STRAIGHT)
-        []( dg::x::DVec& result, Variables& v) {
-        routines::dot(v.f.gradN(0), v.f.curvKappa(), result); 
-        dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);           
         }
     },
     {"v_J_D_kappa_divNK_tt", "Diamagnetic current (time integrated)", true, //FINAL (PART_DIV)

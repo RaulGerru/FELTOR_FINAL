@@ -111,10 +111,12 @@ int main( int argc, char* argv[])
     double psipmax = -fx_0/(1.-fx_0)*psipO;
     std::cout << "psi outer in g1d_out is "<<psipmax<<"\n";
     std::cout << "Generate orthogonal flux-aligned grid ... \n";
-    dg::geo::SimpleOrthogonal generator(mag.get_psip(),
-            psipO, psipmax, mag.R0() + 0.1*mag.params().a(), 0., 0.1*psipO, 1);
+	dg::geo::SimpleOrthogonal generator(mag.get_psip(),
+            psipO<psipmax ? psipO : psipmax,
+            psipO<psipmax ? psipmax : psipO,
+            mag.R0() + 0.1*mag.params().a(), 0., 0.1*psipO, 1);
     dg::geo::CurvilinearGrid2d gridX2d (generator,
-            npsi, Npsi, Neta, dg::DIR_NEU, dg::NEU);
+            npsi, Npsi, Neta, dg::DIR, dg::PER);
     std::cout << "DONE!\n";
     //Create 1d grid
     dg::Grid1d g1d_out(psipO<psipmax ? psipO : psipmax,
