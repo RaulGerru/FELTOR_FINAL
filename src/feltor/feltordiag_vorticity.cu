@@ -96,7 +96,7 @@ int main( int argc, char* argv[])
     //we use so many Neta so that we get close to the X-point
     unsigned npsi = config.get("n",3).asUInt();
     unsigned Npsi = config.get("Npsi", 64).asUInt();
-    unsigned Neta = config.get("Neta", 640).asUInt();
+    unsigned Neta = config.get("Neta", 320).asUInt(); //usually 640
     std::cout << "Using X-point grid resolution (n("<<npsi<<"), Npsi("<<Npsi<<"), Neta("<<Neta<<"))\n";
     double RO = mag.R0(), ZO = 0;
     int point = dg::geo::findOpoint( mag.get_psip(), RO, ZO);
@@ -239,7 +239,7 @@ int main( int argc, char* argv[])
     //
     // interpolate from 2d grid to X-point points
     dg::IHMatrix grid2gridX2d  = dg::create::interpolation(
-        coordsX[0], coordsX[1], g2d_out);
+        coordsX[0], coordsX[1], g2d_out, dg::NEU, dg::NEU, "linear");
     // interpolate fsa back to 2d or 3d grid
     dg::IHMatrix fsa2rzmatrix = dg::create::interpolation(
         psipog2d, g1d_out, dg::DIR_NEU);

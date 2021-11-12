@@ -18,7 +18,7 @@ import sys
 sys.modules[__name__].__dict__.clear()
 
 # fn="Final_Test_1X_simple_diagRaul_FINAL2.nc"
-fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/TA_test_corrected_2_diag.nc"
+fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/TA_test_corrected_2_diag_Interp_Neta960.nc"
 ds = nc.Dataset(fn)
 inputfile = ds.inputfile
 inputfile_json = json.loads(inputfile)
@@ -144,32 +144,16 @@ class Player(FuncAnimation):
         self.slider.set_val(i)
 
 
-def edge_plot(magnitude, title):
-    plt.figure()
-    plt.pcolor(rho[(rho > rho_min) & (rho < rho_max)], (eta - math.pi) / math.pi,
-               magnitude[:, (rho > rho_min) & (rho < rho_max)], cmap='jet')
-    plt.axvline(x=1, color='k', linestyle='--')
-    plt.axhline(-0.5, color='w', linestyle='--')
-    plt.axhline(0, color='w', linestyle='--')
-    plt.axhline(0.5, color='w', linestyle='--')
-    plt.autoscale(enable=True)
-    plt.colorbar()
-    plt.xlabel('$\\rho $')
-    ylabels = ('DOWN', 'HFS', 'UP', 'LFS', 'DOWN')
-    y_pos = [-1, -0.5, 0, 0.5, 1]
-    plt.yticks(y_pos, ylabels)
-    plt.title(title)
-    plt.show()
-
-
-def edge_plot_2(magnitude, title, axes=None):
+def edge_plot(magnitude, title, axes=None):
     if axes is None:
         fig = plt.figure()
         ax1 = fig.add_subplot(1, 1, 1)
     else:
         ax1 = axes
+    cmin = -0.03
+    cmax = 0.05
     p = plt.pcolor(rho[(rho > rho_min) & (rho < rho_max)], (eta - math.pi) / math.pi,
-                   magnitude[:, (rho > rho_min) & (rho < rho_max)], cmap='jet')
+                   magnitude[:, (rho > rho_min) & (rho < rho_max)], cmap='jet',  vmin=cmin, vmax=cmax)#, shading='gouraud')
     ax1.axvline(x=1, color='k', linestyle='--')
     ax1.axhline(-0.5, color='w', linestyle='--')
     ax1.axhline(0, color='w', linestyle='--')
@@ -183,30 +167,6 @@ def edge_plot_2(magnitude, title, axes=None):
     ax1.set_title(title)
     #fig.colorbar(p)
     return p
-
-
-'''
-def edge_animation(magnitude, title):
-    fig, ax = plt.subplots()
-    cax = ax.pcolor(rho, (eta - math.pi) / math.pi, magnitude[1, :-1, :-1], cmap='jet')
-    def animate(i):
-        cax.set_array(magnitude[i + 1, :-1, :-1].flatten('C'))
-    anim = animation.FuncAnimation(fig, animate, interval=100, frames=len(time) - 1)
-    fig.colorbar(cax)
-    plt.axvline(x=1, color='k', linestyle='--')
-    plt.axhline(-0.5, color='w', linestyle='--')
-    plt.axhline(0, color='w', linestyle='--')
-    plt.axhline(0.5, color='w', linestyle='--')
-    #plt.autoscale(enable=True)
-    plt.xlabel('$\\rho $')
-    plt.xlim([rho_min, rho_max])
-    ylabels = ('DOWN', 'HFS', 'UP', 'LFS', 'DOWN')
-    y_pos = [-1, -0.5, 0, 0.5, 1]
-    plt.yticks(y_pos, ylabels)
-    plt.title(title)
-    fig.colorbar()
-    plt.show()
-'''
 
 
 def edge_animation_bar(magnitude, rho, eta, title):
@@ -297,87 +257,53 @@ LHS = dt_Omega + advection
 
 
 fig = plt.figure(figsize=(16, 16))
-fig.suptitle('RHS Conservation of currents EQ')
-ax1 = fig.add_subplot(1, 5, 1)
-p1 = edge_plot_2(vort_elec, r'$\partial_t\Omega_E$', ax1)
-fig.colorbar(p1)
-ax2 = fig.add_subplot(1, 5, 2)
-p2 = edge_plot_2(vort_dielec, r'$\partial_t\Omega_D$', ax2)
-fig.colorbar(p2)
-ax3 = fig.add_subplot(1, 5, 3)
-p3 = edge_plot_2(electric_adv, r'$\nabla \cdot \nabla \cdot (\omega_E u_E)$', ax3)
-fig.colorbar(p3)
-ax4 = fig.add_subplot(1, 5, 4)
-p4 = edge_plot_2(dielectric_adv, r'$\nabla \cdot \nabla \cdot (\omega_D u_E)$', ax4)
-fig.colorbar(p4)
+fig.suptitle('LHS Conservation of currents EQ')
 ax5 = fig.add_subplot(1, 5, 5)
-p5 = edge_plot_2(LHS, 'LHS', ax5)
+p5 = edge_plot(LHS, 'LHS', ax5)
 fig.colorbar(p5)
+ax1 = fig.add_subplot(1, 5, 1)
+p1 = edge_plot(vort_elec, r'$\partial_t\Omega_E$', ax1)
+fig.colorbar(p5)
+ax2 = fig.add_subplot(1, 5, 2)
+p2 = edge_plot(vort_dielec, r'$\partial_t\Omega_D$', ax2)
+fig.colorbar(p5)
+ax3 = fig.add_subplot(1, 5, 3)
+p3 = edge_plot(electric_adv, r'$\nabla \cdot \nabla \cdot (\omega_E u_E)$', ax3)
+fig.colorbar(p5)
+ax4 = fig.add_subplot(1, 5, 4)
+p4 = edge_plot(dielectric_adv, r'$\nabla \cdot \nabla \cdot (\omega_D u_E)$', ax4)
+fig.colorbar(p5)
+
 #fig.tight_layout()
 fig.show()
 
-
-
-
-#edge_plot(electric_adv, r'$\nabla \cdot \nabla \cdot (\omega_E u_E)$')
-# edge_plot(electric_adv_main)
-# plt.title(r'$\nabla \cdot (\nabla \cdot \omega_E u_E)$')
-# edge_plot(electric_adv_alt)
-# plt.title(r'$\nabla \cdot(\omega_E \cdot \nabla u_E)$')
-
-#edge_plot(dielectric_adv, r'$\nabla \cdot \nabla \cdot (\omega_D u_E)$')
-# edge_plot(dielectric_adv_main)
-# plt.title(r'$\nabla \cdot (\nabla \cdot \omega_D u_E)$')
-# edge_plot(dielectric_adv_alt)
-# plt.title(r'$\nabla \cdot(\omega_D \cdot \nabla u_E)$')
-
-
-
-
 J_par = ds['v_J_par_tt_2dX'][:][t_def]
-
-#edge_plot(J_par, r'$\nabla \cdot (J_\parallel \hat{b})$')
 
 fluct_1 = ds['v_J_perp_tt_2dX'][:][t_def]
 fluct_2 = ds['v_J_mag_tt_2dX'][:][t_def]
 fluct_3 = ds['v_M_em_tt_2dX'][:][t_def]
 J_b_perp = fluct_1 + fluct_2 - fluct_3
 
-#edge_plot(J_b_perp, r'$\nabla \cdot J_{b_\perp}$')
-
 curv_1 = ds['v_J_D_divNK_tt_2dX'][:][t_def]
 curv_2 = ds['v_J_JAK_tt_2dX'][:][t_def]
 curv_3 = ds['v_J_NUK_tt_2dX'][:][t_def]
 J_curv = curv_1 + curv_2 + curv_3
-
-#edge_plot(J_curv, r'$\nabla \cdot J_{curv}$')
-
-#E_r = ds['RFB_E_r_tt_2dX'][:][t_def]
-# edge_plot(E_r)
-# plt.title(r'$E_r$')
-
-#dP_dr = ds['RFB_GradPi_tt_2dX'][:][t_def]
-# edge_plot(dP_dr)
-# plt.title(r'$\partial P_i/\partial r$')
-
-# edge_plot(E_r+dP_dr)
-# plt.title('Difference from easy RFB')
 
 RHS=J_par+J_b_perp+J_curv
 
 fig = plt.figure(figsize=(16, 16))
 fig.suptitle('RHS Conservation of currents EQ')
 ax1 = fig.add_subplot(1, 4, 1)
-p1 = edge_plot_2(J_par, 'J_par', ax1)
+p1 = edge_plot(J_par, 'J_par', ax1)
 fig.colorbar(p1)
 ax2 = fig.add_subplot(1, 4, 2)
-p2 = edge_plot_2(J_b_perp, 'J_b_perp', ax2)
+p2 = edge_plot(J_b_perp, 'J_b_perp', ax2)
 fig.colorbar(p2)
 ax3 = fig.add_subplot(1, 4, 3)
-p3 = edge_plot_2(J_curv, 'J_curv', ax3)
+p3 = edge_plot(J_curv, 'J_curv', ax3)
 fig.colorbar(p3)
 ax4 = fig.add_subplot(1, 4, 4)
-p4 = edge_plot_2(J_b_perp, 'RHS', ax4)
+p4 = edge_plot(RHS, 'RHS', ax4)
 fig.colorbar(p4)
 #fig.tight_layout()
 fig.show()
@@ -387,13 +313,21 @@ fig.show()
 fig = plt.figure(figsize=(8, 8))
 fig.suptitle('Conservation of currents EQ')
 ax1 = fig.add_subplot(1, 2, 1)
-p1 = edge_plot_2(LHS, 'LHS', ax1)
+p1 = edge_plot(LHS, 'LHS', ax1)
 fig.colorbar(p1)
 ax2 = fig.add_subplot(1, 2, 2)
-p2 = edge_plot_2(RHS, 'rhs', ax2)
+p2 = edge_plot(RHS, 'rhs', ax2)
 fig.colorbar(p2)
 #fig.tight_layout()
 fig.show()
+
+
+
+E_r = ds['RFB_E_r_tt_2dX'][:][t_def]
+
+dP_dr = ds['RFB_GradPi_tt_2dX'][:][t_def]
+
+
 
 
 '''

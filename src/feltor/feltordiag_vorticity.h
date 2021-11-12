@@ -721,15 +721,17 @@ std::vector<Record> diagnostics2d_list = {
             );
         }
     },
-    {"lneperp_tt", "Perpendicular electron diffusion (Time average)", true,
+    {"lneperp_tt", "Perpendicular electron diffusion (Time average)", true,  //THIS IS MODIFIED IN NEW VERSIONS, SO WHEN UPDATING, I WILL NEED TO UPDATE IT
         []( dg::x::DVec& result, Variables& v ) {
-            v.f.compute_perp_diffusiveN( 1., v.f.density(0), v.tmp[0],
+        v.f.compute_perp_diffusiveN( 1., v.f.density(0), v.tmp[0],
                     v.tmp[1], 0., result);
         }
     },
     //{"lneparallel_tt", "Parallel electron diffusion (Time average)", true,
     //    []( dg::x::DVec& result, Variables& v ) {
-    //        v.f.compute_lapParN( v.p.nu_parallel_n, 0, 0., result, v.tmp[0]);
+    //     dg::blas1::pointwiseDot( v.p.nu_parallel, v.f.divb(), v.f.dsN(0),
+    //                                0., result);
+    //        dg::blas1::axpby( v.p.nu_parallel, v.f.dssN(0), 1., result);
     //    }
     //},
     {"sne_tt", "Source term for electron density (Time average)", true,
@@ -2149,9 +2151,29 @@ std::vector<Record> diagnostics2d_list = {
             v.nabla.div(v.tmp[0], v.tmp[1], result);       
         }
     },
-        {"v_S_D_tt", "Diamagnetic source vorticity (time integrated)", true, //FINAL
+    {"v_L_E_perp_tt", "Electric perp Diffusion source vorticity (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-             v.f.compute_gradSN(0,  v.tmp); 
+            v.f.compute_perp_diffusiveN( 1., v.f.density(0), v.tmp[0],
+                    v.tmp[1], 0., result);
+			routines::scal(result, v.f.gradP(0), v.tmp);
+			routines::scal(v.f.binv(), v.tmp, v.tmp2);
+			routines::scal(v.f.binv(), v.tmp2, v.tmp);
+            v.nabla.div(v.tmp[0], v.tmp[1], result);
+        }
+    },
+     //{"v_L_E_par_tt", "Electric parallel Diffusion source vorticity (time integrated)", true, //FINAL
+     //   []( dg::x::DVec& result, Variables& v) {
+     //       v.f.compute_lapParN( v.p.nu_parallel_n, 0, 0., result, v.tmp[0]);
+	//		routines::scal(result, v.f.gradP(0), v.tmp);
+    //			routines::scal(v.f.binv(), v.tmp, v.tmp2);
+	//		routines::scal(v.f.binv(), v.tmp2, v.tmp);
+    //        v.nabla.div(v.tmp[0], v.tmp[1], result);
+    //    }
+    //},
+
+    {"v_S_D_tt", "Diamagnetic source vorticity (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+             v.f.compute_gradSN(0,  v.tmp);
 			 routines::scal(v.f.binv(), v.tmp, v.tmp2); 
 			 routines::scal(v.f.binv(), v.tmp2, v.tmp);             
              v.nabla.div(v.tmp[0], v.tmp[1], result);
