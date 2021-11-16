@@ -1955,7 +1955,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::axpby(1, v.tmp[1], 1, v.tmp2[1]);
              routines::scal(v.f.binv(), v.tmp2, v.tmp2);
              routines::scal(v.f.binv(), v.tmp2, v.tmp2); //M^em            
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp      
+             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
              routines::scal(result, v.tmp, v.tmp);
              routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp);        
@@ -1978,7 +1978,8 @@ std::vector<Record> diagnostics2d_list = {
     /*
     {"v_J_perp_r_tt", "Perp gradient current term in radial direction (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
+
+             (v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
                         
              dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(1), v.tmp[2]);
              dg::blas1::pointwiseDot(-1., v.f.density(0), v.f.velocity(0), 1., v.tmp[2]);
@@ -2151,9 +2152,19 @@ std::vector<Record> diagnostics2d_list = {
             v.nabla.div(v.tmp[0], v.tmp[1], result);       
         }
     },
-    {"v_L_E_perp_tt", "Electric perp Diffusion source vorticity (time integrated)", true, //FINAL
+    {"v_L_E_perp_tt", "Electric perp electrons Diffusion source vorticity (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
             v.f.compute_perp_diffusiveN( 1., v.f.density(0), v.tmp[0],
+                    v.tmp[1], 0., result);
+			routines::scal(result, v.f.gradP(0), v.tmp);
+			routines::scal(v.f.binv(), v.tmp, v.tmp2);
+			routines::scal(v.f.binv(), v.tmp2, v.tmp);
+            v.nabla.div(v.tmp[0], v.tmp[1], result);
+        }
+    },
+    {"v_L_i_perp_tt", "Electric perp Diffusion ions gyrocenter source vorticity (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+            v.f.compute_perp_diffusiveN( 1., v.f.density(1), v.tmp[0],
                     v.tmp[1], 0., result);
 			routines::scal(result, v.f.gradP(0), v.tmp);
 			routines::scal(v.f.binv(), v.tmp, v.tmp2);

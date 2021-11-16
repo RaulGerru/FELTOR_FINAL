@@ -7,6 +7,7 @@ ANALYSIS PROGRAM FOR VORTICITY EQUATION IN FELTOR:
 
 import netCDF4 as nc
 import numpy as np
+from scipy import fftpack
 import json
 import math
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ import sys
 sys.modules[__name__].__dict__.clear()
 
 # fn="Final_Test_1X_simple_diagRaul_FINAL2.nc"
-fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/TA_test_corrected_2_diag_Interp_Neta960.nc"
+fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/TA_test_corrected_3_diag.nc"
 ds = nc.Dataset(fn)
 inputfile = ds.inputfile
 inputfile_json = json.loads(inputfile)
@@ -46,7 +47,7 @@ C = e * n0 * Omega_0
 rho = ds['rho'][:]
 eta = ds['eta'][:]  # Poloidal direction (from 0 to 2pi)
 t = ds['time'][:]
-t_def = 7
+t_def = 9
 time = 1e3 * ds['time'][:] / Omega_0
 density = ds['electrons_2dX'][:][t_def]
 
@@ -54,6 +55,11 @@ density = ds['electrons_2dX'][:][t_def]
 def closest(lst, K):
     return lst[min(range(len(lst)), key=lambda i: abs(lst[i] - K))]
 
+def filter(data):
+    fft = fftpack.fft2(data)
+    fft[26:1894] = 0
+    data = fftpack.ifft2(fft).real
+    return data
 
 class Player(FuncAnimation):
     def __init__(self, fig, func, frames=None, init_func=None, fargs=None,
@@ -153,7 +159,31 @@ def edge_plot(magnitude, title, axes=None):
     cmin = -0.03
     cmax = 0.05
     p = plt.pcolor(rho[(rho > rho_min) & (rho < rho_max)], (eta - math.pi) / math.pi,
-                   magnitude[:, (rho > rho_min) & (rho < rho_max)], cmap='jet',  vmin=cmin, vmax=cmax)#, shading='gouraud')
+                   filter(magnitude[:, (rho > rho_min) & (rho < rho_max)]), cmap='jet',  vmin=cmin, vmax=cmax)#, shading='gouraud')
+    ax1.axvline(x=1, color='k', linestyle='--')
+    ax1.axhline(-0.5, color='w', linestyle='--')
+    ax1.axhline(0, color='w', linestyle='--')
+    ax1.axhline(0.5, color='w', linestyle='--')
+    ax1.autoscale(enable=True)
+    ax1.set_xlabel('$\\rho $')
+    ylabels = ('DOWN', 'LFS', 'UP', 'HFS', 'DOWN')
+    y_pos = [-1, -0.5, 0, 0.5, 1]
+    ax1.set_yticks(y_pos)
+    ax1.set_yticklabels(ylabels)
+    ax1.set_title(title)
+    #fig.colorbar(p)
+    return p
+
+def edge_plot_2(magnitude, title, axes=None):
+    if axes is None:
+        fig = plt.figure()
+        ax1 = fig.add_subplot(1, 1, 1)
+    else:
+        ax1 = axes
+    #cmin = -0.03
+    #cmax = 0.05
+    p = plt.pcolor(rho[(rho > rho_min) & (rho < rho_max)], (eta - math.pi) / math.pi,
+                   filter(magnitude[:, (rho > rho_min) & (rho < rho_max)]), cmap='jet')#,  vmin=cmin, vmax=cmax)#, shading='gouraud')
     ax1.axvline(x=1, color='k', linestyle='--')
     ax1.axhline(-0.5, color='w', linestyle='--')
     ax1.axhline(0, color='w', linestyle='--')
@@ -232,7 +262,7 @@ rho_max = 1.1
 data = ds['v_vort_E_2dX']
 
 
-vort_elec = ds['v_vort_E_2dX'][:][t_def]- ds['v_vort_E_2dX'][:][t_def - 1]
+vort_elec = ds['v_vort_E_2dX'][:][t_def] - ds['v_vort_E_2dX'][:][t_def - 1]
 vort_dielec = ds['v_vort_D_2dX'][:][t_def] - ds['v_vort_D_2dX'][:][t_def - 1]
 dt_Omega = vort_elec + vort_dielec
 
@@ -308,18 +338,26 @@ fig.colorbar(p4)
 #fig.tight_layout()
 fig.show()
 
+diffusion = ds['v_L_E_perp_tt_2dX'][:][t_def]
 
 
-fig = plt.figure(figsize=(8, 8))
+fig = plt.figure(figsize=(16, 16))
 fig.suptitle('Conservation of currents EQ')
-ax1 = fig.add_subplot(1, 2, 1)
+ax1 = fig.add_subplot(1, 4, 1)
 p1 = edge_plot(LHS, 'LHS', ax1)
 fig.colorbar(p1)
-ax2 = fig.add_subplot(1, 2, 2)
+ax2 = fig.add_subplot(1, 4, 2)
 p2 = edge_plot(RHS, 'rhs', ax2)
 fig.colorbar(p2)
+ax3 = fig.add_subplot(1, 4, 3)
+p3 = edge_plot(LHS-RHS, 'lhs-rhs', ax3)
+fig.colorbar(p3)
+ax4 = fig.add_subplot(1, 4, 4)
+p4 = edge_plot(diffusion, 'diffusion', ax4)
+fig.colorbar(p4)
 #fig.tight_layout()
 fig.show()
+
 
 
 
@@ -351,20 +389,6 @@ plt.title('u_E_pol')
     plt.title(r'$\Omega_S$')
  
     
-    plt.pcolor(rho[(rho>rho_min) & (rho<rho_max)], (eta-math.pi)/math.pi, curv_1[0][:, (rho>rho_min) & (rho<rho_max)], cmap='jet', shading='auto' )
-    plt.axvline(x=1, color='k', linestyle='--')
-    plt.axhline(-0.5, color='w', linestyle='--')
-    plt.axhline(0, color='w', linestyle='--')
-    plt.axhline(0.5, color='w', linestyle='--')
-    plt.autoscale(enable=True)
-    plt.colorbar()
-    plt.xlabel('$\\rho $')
-    #plt.ylabel('$\\theta/\\pi$')
-    #plt.clim(-1e10, 1e10)
-    ylabels=('X-point', 'HFS', 'UP', 'LFS', 'X-point')
-    y_pos=[-1, -0.5, 0, 0.5, 1]
-    plt.yticks(y_pos, ylabels)
-    #plt.xlim(-0.5, 0.5)
 '''
 '''
 #LIST OF CONCLUSIONS
