@@ -2060,6 +2060,12 @@ std::vector<Record> diagnostics2d_list = {
         dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);           
         }
     },
+    {"v_J_D_kappa_divNK_alt_tt", "Diamagnetic current (time integrated)", true, //FINAL (PART_DIV)
+        []( dg::x::DVec& result, Variables& v) {
+        routines::dot(v.f.gradN(0), v.f.curvKappa(), result);
+        dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);
+        }
+    },
     {"v_J_D_divNK_tt", "Diamagnetic current (time integrated)", true, //FINAL (PART_DIV)
         []( dg::x::DVec& result, Variables& v) {
         routines::scal(v.f.density(0), v.f.curv(), v.tmp);   
@@ -2086,13 +2092,13 @@ std::vector<Record> diagnostics2d_list = {
 			routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradN(0), v.tmp);
 			v.nabla.div(v.tmp[0], v.tmp[1], result);
 			dg::blas1::scal(result, v.p.tau[1]);
-            
+
         }
     },
     {"v_J_D_r_tt", "Diamagnetic current in radial direction(time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
 			routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradN(0), v.tmp);
-			routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp2);    
+			routines::radial_project_vec(v.tmp, v.gradPsip, v.tmp2);
 			v.nabla.div(v.tmp2[0], v.tmp2[1], result);
 			dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);
         }
