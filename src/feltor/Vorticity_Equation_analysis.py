@@ -19,7 +19,7 @@ import sys
 sys.modules[__name__].__dict__.clear()
 
 # fn="Final_Test_1X_simple_diagRaul_FINAL2.nc"
-fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/TA_test_corrected_3_diag.nc"
+fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/TA_test_corrected_4_diag.nc"
 ds = nc.Dataset(fn)
 inputfile = ds.inputfile
 inputfile_json = json.loads(inputfile)
@@ -47,7 +47,7 @@ C = e * n0 * Omega_0
 rho = ds['rho'][:]
 eta = ds['eta'][:]  # Poloidal direction (from 0 to 2pi)
 t = ds['time'][:]
-t_def = 9
+t_def = 6
 time = 1e3 * ds['time'][:] / Omega_0
 density = ds['electrons_2dX'][:][t_def]
 
@@ -338,7 +338,7 @@ fig.colorbar(p4)
 #fig.tight_layout()
 fig.show()
 
-diffusion = ds['v_L_E_perp_tt_2dX'][:][t_def]
+diffusion = ds['v_L_i_perp_tt_2dX'][:][t_def]
 
 
 fig = plt.figure(figsize=(16, 16))
