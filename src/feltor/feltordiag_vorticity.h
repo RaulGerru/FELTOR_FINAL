@@ -1473,7 +1473,7 @@ std::vector<Record> diagnostics2d_list = {
     
     
     ///VORTICITY DEFINITIONS: TIME CHANGE, NOT TIME CHANGE AND RADIAL TERMS
-    {"v_vort_E", "Electric polarization charge density (PCD)", false,
+    {"v_vort_E", "Electric polarization charge density", false,
         []( dg::x::DVec& result, Variables& v) {
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
@@ -1481,7 +1481,7 @@ std::vector<Record> diagnostics2d_list = {
              v.nabla.div(v.tmp[0], v.tmp[1], result);
         }
     },
-    {"v_vort_D", "Diamagnetic polarization charge density (PCD)", false,
+    {"v_vort_D", "Diamagnetic polarization charge density", false,
         []( dg::x::DVec& result, Variables& v) {         
          dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
          routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp); //grad(ni)/B^2= grad(ne)/B^2            
@@ -1535,7 +1535,7 @@ std::vector<Record> diagnostics2d_list = {
 	///ADVECTIVE TERMS
     {"v_adv_E_tt", "Electric advective term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 routines::times(v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //ne Grad_phi/B^2
@@ -1549,7 +1549,7 @@ std::vector<Record> diagnostics2d_list = {
     },
     {"v_adv_E", "Electric advective term", false,
         []( dg::x::DVec& result, Variables& v) {
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
+			 routines::times(v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //ne Grad_phi/B^2
@@ -1563,7 +1563,7 @@ std::vector<Record> diagnostics2d_list = {
     },
     {"v_adv_E_main_tt", "Main electric advective term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 routines::times(v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //n_e Grad_phi/B^2   
@@ -1575,7 +1575,7 @@ std::vector<Record> diagnostics2d_list = {
     
     {"v_adv_E_alt_tt", "Alternative electric advective term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 routines::times(v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
 			 dg::blas1::pointwiseDot(v.f.density(0), v.f.binv(), v.tmp2[0]);
 			 dg::blas1::pointwiseDot(v.tmp2[0], v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradP(0), v.tmp3); //N_i Grad_phi/B^2     
@@ -1628,7 +1628,7 @@ std::vector<Record> diagnostics2d_list = {
     */
     {"v_adv_D_tt", "Diamagnetic advective term (time integrated)", true,
         []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 routines::times(v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); //Grad_N_i/B^2      
              v.nabla.div(v.tmp3[0], v.tmp3[1], result); 
@@ -1642,7 +1642,7 @@ std::vector<Record> diagnostics2d_list = {
     },
     {"v_adv_D", "Diamagnetic advective term", false,
         []( dg::x::DVec& result, Variables& v) {
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
+			 routines::times(v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); //Grad_N_i/B^2
              v.nabla.div(v.tmp3[0], v.tmp3[1], result);
@@ -1656,7 +1656,7 @@ std::vector<Record> diagnostics2d_list = {
     },
     {"v_adv_D_main_tt", "Main diamagnetic term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 routines::times(v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); //Grad_N_i/B^2       
              v.nabla.div(v.tmp3[0], v.tmp3[1], result); 
@@ -1667,7 +1667,7 @@ std::vector<Record> diagnostics2d_list = {
     },
     {"v_adv_D_alt_tt", "Alternative diamagnetic term (time integrated)", true, 
         []( dg::x::DVec& result, Variables& v) {            
-			 routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E			 
+			 routines::times(v.f.bhatgB(), v.f.gradP(0), v.tmp); //u_E
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp2[0]);
              routines::scal(v.tmp2[0], v.f.gradN(0), v.tmp3); //Grad n_e/B^2       
              v.nabla.v_dot_nabla_f(v.tmp3[0], v.tmp3[1], v.tmp[0], v.tmp[0]); 
@@ -1833,7 +1833,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::axpby(1, v.tmp, 1, v.tmp2);
              routines::scal(v.f.binv(), v.tmp2, v.tmp3);
              routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
+             routines::times(v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
              routines::scal(result, v.tmp, v.tmp3);
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
@@ -1850,7 +1850,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::axpby(1, v.tmp, 1, v.tmp2);
              routines::scal(v.f.binv(), v.tmp2, v.tmp3);
              routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
+             routines::times(v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
              v.nabla.div(v.tmp2[0], v.tmp2[1], result);
              routines::scal(result, v.tmp, v.tmp3);
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]);
@@ -1867,7 +1867,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::axpby(1.0, v.tmp, 1.0, v.tmp2);
              routines::scal(v.f.binv(), v.tmp2, v.tmp3);
              routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
+             routines::times(v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
              routines::scal(result, v.tmp, v.tmp3); 
              v.nabla.div(v.tmp3[0], v.tmp3[1], result);
@@ -1881,7 +1881,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::axpby(1.0, v.tmp, 1, v.tmp2);
              routines::scal(v.f.binv(), v.tmp2, v.tmp3);
              routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em             
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp       
+             routines::times(v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[0], v.tmp[0]); 
              v.nabla.v_dot_nabla_f(v.tmp2[0], v.tmp2[1], v.tmp[1], v.tmp[1]); ////N grad(phi)/B^2*div u_E     
              v.nabla.div(v.tmp[0], v.tmp[1], result);
@@ -1993,7 +1993,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::axpby(1.0, v.tmp, 1.0, v.tmp2);
              routines::scal(v.f.binv(), v.tmp2, v.tmp3);
              routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em            
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp      
+             routines::times(v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
              v.nabla.div(v.tmp2[0], v.tmp2[1], result); 
              routines::scal(result, v.tmp, v.tmp3);       
              v.nabla.div(v.tmp3[0], v.tmp3[1], result);
@@ -2008,7 +2008,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::axpby(1.0, v.tmp, 1.0, v.tmp2);
              routines::scal(v.f.binv(), v.tmp2, v.tmp3);
              routines::scal(v.f.binv(), v.tmp3, v.tmp2); //M^em
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
+             routines::times(v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
              v.nabla.div(v.tmp2[0], v.tmp2[1], result);
              routines::scal(result, v.tmp, v.tmp3);
              v.nabla.div(v.tmp3[0], v.tmp3[1], result);
@@ -2037,7 +2037,7 @@ std::vector<Record> diagnostics2d_list = {
     */
     {"v_J_perp_tt", "Perp gradient current term (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp                      
+             routines::times(v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
              dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(1), v.tmp2[0]);
              dg::blas1::pointwiseDot(-1., v.f.density(0), v.f.velocity(0), 1., v.tmp2[0]); //J_||
              routines::scal(v.tmp2[0], v.tmp, v.tmp3);      
@@ -2047,7 +2047,7 @@ std::vector<Record> diagnostics2d_list = {
     },
      {"v_J_perp", "Perp gradient current term", false, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-             routines::times(v.f.binv(),v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
+             routines::times(v.f.bhatgB(), v.f.gradA(), v.tmp); //b_perp
              dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(1), v.tmp2[0]);
              dg::blas1::pointwiseDot(-1., v.f.density(0), v.f.velocity(0), 1., v.tmp2[0]); //J_||
              routines::scal(v.tmp2[0], v.tmp, v.tmp3);
@@ -2373,7 +2373,7 @@ std::vector<Record> diagnostics2d_list = {
             dg::blas1::scal( result, -1.);
         }
     },
-   {"RFB_E_r", "Radial electric field in RFB", false,
+     {"RFB_E_r", "Radial electric field in RFB", false,
         []( dg::x::DVec& result, Variables& v){
             routines::radial_project_scal(v.f.gradP(0), v.gradPsip, result);
             dg::blas1::scal( result, -1.);
