@@ -19,7 +19,7 @@ import sys
 sys.modules[__name__].__dict__.clear()
 
 # fn="Final_Test_1X_simple_diagRaul_FINAL2.nc"
-fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/TA_test_corrected_4_diag.nc"
+fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/TA_test_corrected_5_diag.nc"
 ds = nc.Dataset(fn)
 inputfile = ds.inputfile
 inputfile_json = json.loads(inputfile)
@@ -47,7 +47,7 @@ C = e * n0 * Omega_0
 rho = ds['rho'][:]
 eta = ds['eta'][:]  # Poloidal direction (from 0 to 2pi)
 t = ds['time'][:]
-t_def = 6
+t_def = 1
 time = 1e3 * ds['time'][:] / Omega_0
 density = ds['electrons_2dX'][:][t_def]
 
@@ -315,6 +315,9 @@ fluct_3 = ds['v_M_em_tt_2dX'][:][t_def]
 J_b_perp = fluct_1 + fluct_2 - fluct_3
 
 curv_1 = ds['v_J_D_divNK_tt_2dX'][:][t_def]
+curv_1_alt = ds['v_J_D_divNK_alt_tt_2dX'][:][t_def]
+curv_4 = ds['v_J_D_kappa_divNK_tt_2dX'][:][t_def]
+curv_4_alt = ds['v_J_D_kappa_divNK_alt_tt_2dX'][:][t_def]
 curv_2 = ds['v_J_JAK_tt_2dX'][:][t_def]
 curv_3 = ds['v_J_NUK_tt_2dX'][:][t_def]
 J_curv = curv_1 + curv_2 + curv_3
@@ -358,7 +361,20 @@ fig.colorbar(p4)
 #fig.tight_layout()
 fig.show()
 
+fig = plt.figure(figsize=(16, 16))
+fig.suptitle('Comparison of curvatures')
+ax1 = fig.add_subplot(1, 3, 1)
+p1 = edge_plot(curv_4, 'Type1', ax1)
+fig.colorbar(p1)
+ax2 = fig.add_subplot(1, 3, 2)
+p2 = edge_plot(curv_4_alt, 'Type2', ax2)
+fig.colorbar(p2)
+ax3 = fig.add_subplot(1, 3, 3)
+p3 = edge_plot(curv_4-curv_4_alt, 'Difference', ax3)
+fig.colorbar(p3)
 
+#fig.tight_layout()
+fig.show()
 
 
 E_r = ds['RFB_E_r_tt_2dX'][:][t_def]
