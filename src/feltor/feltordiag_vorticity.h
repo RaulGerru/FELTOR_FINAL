@@ -2205,14 +2205,16 @@ std::vector<Record> diagnostics2d_list = {
     ///J_curv TERMS
     {"v_J_D_tt", "Diamagnetic current (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
-        dg::blas1::axpby(-1.0, v.p.tau[0], 1.0, v.p.tau[1], v.tmp[0]);
-        routines::dot(v.tmp[0], v.f.gradN(0), v.f.curv(), result);
+        routines::dot(v.f.gradN(0), v.f.curv(), result);
+        dg::blas1::scal(result, v.p.tau[1]-v.p.tau[0]);
         }
     },
     {"v_J_D_gf_tt", "Diamagnetic current (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
         routines::dot(v.p.tau[1], v.f.gradN(1), v.f.curv(), result);
+        dg::blas1::scal(result, v.p.tau[1]);
         routines::dot(v.p.tau[0], v.f.gradN(0), v.f.curv(), v.tmp[0]);
+        dg::blas1::scal(v.tmp[0], v.p.tau[0]);
         dg::blas1::axpby(-1.0, v.tmp[0], 1.0, result);
         }
     },
