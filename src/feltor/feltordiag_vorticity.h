@@ -1183,7 +1183,34 @@ std::vector<Record> diagnostics2d_list = {
                     v.tmp[1], 0., v.tmp[2]);
             dg::blas1::pointwiseDot( v.p.mu[1], v.tmp[2], result, 0., result);
         }
-    },    
+    },
+    /// --------------------- Lorentz force terms ---------------------------//
+    {"socurve_tt", "Vorticity source term electron curvature (Time average)", true,
+        []( dg::x::DVec& result, Variables& v) {
+            routines::dot( v.f.curv(), v.gradPsip, result);
+            dg::blas1::pointwiseDot( -v.p.tau[0], v.f.density(0), result, 0., result);
+        }
+    },
+    {"socurvi_tt", "Vorticity source term ion curvature (Time average)", true,
+        []( dg::x::DVec& result, Variables& v) {
+            routines::dot( v.f.curv(), v.gradPsip, result);
+            dg::blas1::pointwiseDot( v.p.tau[1], v.f.density(1), result, 0., result);
+        }
+    },
+    {"socurvkappae_tt", "Vorticity source term electron kappa curvature (Time average)", true,
+        []( dg::x::DVec& result, Variables& v) {
+            routines::dot( v.f.curvKappa(), v.gradPsip, result);
+            dg::blas1::pointwiseDot( 1., v.f.density(0), v.f.velocity(0), v.f.velocity(0), 0., v.tmp[0]);
+            dg::blas1::pointwiseDot( -v.p.mu[0], v.tmp[0], result, 0., result);
+        }
+    },
+    {"socurvkappai_tt", "Vorticity source term ion kappa curvature (Time average)", true,
+        []( dg::x::DVec& result, Variables& v) {
+            routines::dot( v.f.curvKappa(), v.gradPsip, result);
+            dg::blas1::pointwiseDot( 1., v.f.density(1), v.f.velocity(1), v.f.velocity(1), 0., v.tmp[0]);
+            dg::blas1::pointwiseDot( v.p.mu[1], v.tmp[0], result, 0., result);
+        }
+    },
     ///-----------------------Parallel momentum terms ------------------------//
     {"neue", "Product of electron density and velocity", false,
         []( dg::x::DVec& result, Variables& v ) {
@@ -1427,33 +1454,6 @@ std::vector<Record> diagnostics2d_list = {
             dg::blas1::pointwiseDot( 1., v.f.velocity(1), v.f.density(1), -1.,
                     v.f.velocity(0), v.f.density(0), 0., result);
             dg::blas1::pointwiseDot( v.p.eta, result, v.f.density(0), 0, result);
-        }
-    },
-    /// --------------------- Lorentz force terms ---------------------------//
-    {"socurve_tt", "Vorticity source term electron curvature (Time average)", true,
-        []( dg::x::DVec& result, Variables& v) {
-            routines::dot( v.f.curv(), v.gradPsip, result);
-            dg::blas1::pointwiseDot( -v.p.tau[0], v.f.density(0), result, 0., result);
-        }
-    },
-    {"socurvi_tt", "Vorticity source term ion curvature (Time average)", true,
-        []( dg::x::DVec& result, Variables& v) {
-            routines::dot( v.f.curv(), v.gradPsip, result);
-            dg::blas1::pointwiseDot( v.p.tau[1], v.f.density(1), result, 0., result);
-        }
-    },
-    {"socurvkappae_tt", "Vorticity source term electron kappa curvature (Time average)", true,
-        []( dg::x::DVec& result, Variables& v) {
-            routines::dot( v.f.curvKappa(), v.gradPsip, result);
-            dg::blas1::pointwiseDot( 1., v.f.density(0), v.f.velocity(0), v.f.velocity(0), 0., v.tmp[0]);
-            dg::blas1::pointwiseDot( -v.p.mu[0], v.tmp[0], result, 0., result);
-        }
-    },
-    {"socurvkappai_tt", "Vorticity source term ion kappa curvature (Time average)", true,
-        []( dg::x::DVec& result, Variables& v) {
-            routines::dot( v.f.curvKappa(), v.gradPsip, result);
-            dg::blas1::pointwiseDot( 1., v.f.density(1), v.f.velocity(1), v.f.velocity(1), 0., v.tmp[0]);
-            dg::blas1::pointwiseDot( v.p.mu[1], v.tmp[0], result, 0., result);
         }
     },
     /// --------------------- Zonal flow energy terms------------------------//
