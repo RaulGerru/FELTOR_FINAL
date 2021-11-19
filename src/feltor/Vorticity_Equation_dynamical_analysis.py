@@ -7,6 +7,7 @@ ANALYSIS PROGRAM FOR VORTICITY EQUATION IN FELTOR:
 
 import netCDF4 as nc
 import numpy as np
+from scipy import fftpack
 import json
 import math
 import matplotlib.pyplot as plt
@@ -51,6 +52,12 @@ time = 1e3 * ds['time'][:] / Omega_0
 def closest(lst, K):
     return lst[min(range(len(lst)), key=lambda i: abs(lst[i] - K))]
 
+def filter(data):
+    for i in range(0, t.size-1):
+        fft = fftpack.fft2(data[i])
+        fft[26:1894] = 0
+        data[i] = fftpack.ifft2(fft).real
+    return data
 
 class Player(FuncAnimation):
     def __init__(self, fig, func, frames=None, init_func=None, fargs=None,
@@ -141,13 +148,16 @@ class Player(FuncAnimation):
         self.slider.set_val(i)
 
 def edge_plot(magnitude, title, axes=None):
+    cmin = -0.03
+    cmax = 0.05
+    m=filter(magnitude)
     if axes is None:
         fig = plt.figure()
         ax1 = fig.add_subplot(1, 1, 1)
     else:
         ax1 = axes
     p = plt.pcolormesh(rho[(rho > rho_min) & (rho < rho_max)], (eta - math.pi) / math.pi,
-                   magnitude[:, (rho > rho_min) & (rho < rho_max)], cmap='jet', shading='gouraud')
+                   m[:, (rho > rho_min) & (rho < rho_max)], cmap='jet',  vmin=cmin, vmax=cmax)#, shading='gouraud')
     ax1.axvline(x=1, color='k', linestyle='--')
     ax1.axhline(-0.5, color='w', linestyle='--')
     ax1.axhline(0, color='w', linestyle='--')
@@ -159,16 +169,17 @@ def edge_plot(magnitude, title, axes=None):
     ax1.set_yticks(y_pos)
     ax1.set_yticklabels(ylabels)
     ax1.set_title(title)
-    #fig.colorbar(p)
     return p
 
 
 def edge_animation_bar(magnitude, title):
+    m=filter(magnitude)
     fig, ax = plt.subplots()
-    cax = ax.pcolor(rho, (eta - math.pi) / math.pi, magnitude[1, :-1, :-1], cmap='jet', shading='gouraud')
+
+    cax = ax.pcolor(rho, (eta - math.pi) / math.pi, m[1, :-1, :-1], cmap='jet')
 
     def animate(i):
-        cax.set_array(magnitude[i + 1, :-1, :-1].flatten('C'))
+        cax.set_array(m[i + 1, :-1, :-1].flatten('C'))
     fig.colorbar(cax)
     plt.axvline(x=1, color='k', linestyle='--')
     plt.axhline(-0.5, color='w', linestyle='--')
@@ -188,15 +199,17 @@ def edge_animation_bar(magnitude, title):
 def edge_animation_bar_2(magnitude1, title1, magnitude2, title2):
         cmin=-0.02
         cmax=0.05
+        m1=filter(magnitude1)
+        m2=filter(magnitude2)
         fig=plt.figure(figsize=(16, 16))
         ax1 = fig.add_subplot(1,2,1)
-        cax1 = ax1.pcolor(rho, (eta - math.pi) / math.pi, magnitude1[1, :-1, :-1], cmap='jet', vmin=cmin, vmax=cmax)
+        cax1 = ax1.pcolor(rho, (eta - math.pi) / math.pi, m1[1, :-1, :-1], cmap='jet', vmin=cmin, vmax=cmax)
         ax2 = fig.add_subplot(1, 2, 2)
-        cax2 = ax2.pcolor(rho, (eta - math.pi) / math.pi, magnitude2[1, :-1, :-1], cmap='jet', vmin=cmin, vmax=cmax)
+        cax2 = ax2.pcolor(rho, (eta - math.pi) / math.pi, m2[1, :-1, :-1], cmap='jet', vmin=cmin, vmax=cmax)
 
         def animate(i):
-            cax1.set_array(magnitude1[i + 1, :-1, :-1].flatten('C'))
-            cax2.set_array(magnitude2[i + 1, :-1, :-1].flatten('C'))
+            cax1.set_array(m1[i + 1, :-1, :-1].flatten('C'))
+            cax2.set_array(m2[i + 1, :-1, :-1].flatten('C'))
 
         fig.colorbar(cax1)
         #ax2.colorbar(cax2)
@@ -226,12 +239,94 @@ def edge_animation_bar_2(magnitude1, title1, magnitude2, title2):
         #plt.show()
 
 
+def edge_animation_bar_5(magnitude1, title1, magnitude2, title2, magnitude3, title3, magnitude4, title4, magnitude5, title5):
+    cmin = -0.06
+    cmax = 0.06
+    m1 = filter(magnitude1)
+    m2 = filter(magnitude2)
+    m3 = filter(magnitude3)
+    m4 = filter(magnitude4)
+    m5 = filter(magnitude5)
+    fig = plt.figure(figsize=(16, 16))
+    ax1 = fig.add_subplot(1, 5, 1)
+    cax1 = ax1.pcolor(rho, (eta - math.pi) / math.pi, m1[1, :-1, :-1], cmap='jet', vmin=cmin, vmax=cmax)
+    ax2 = fig.add_subplot(1, 5, 2)
+    cax2 = ax2.pcolor(rho, (eta - math.pi) / math.pi, m2[1, :-1, :-1], cmap='jet', vmin=cmin, vmax=cmax)
+    ax3 = fig.add_subplot(1, 5, 3)
+    cax3 = ax3.pcolor(rho, (eta - math.pi) / math.pi, m3[1, :-1, :-1], cmap='jet', vmin=cmin, vmax=cmax)
+    ax4 = fig.add_subplot(1, 5, 4)
+    cax4 = ax4.pcolor(rho, (eta - math.pi) / math.pi, m4[1, :-1, :-1], cmap='jet', vmin=cmin, vmax=cmax)
+    ax5 = fig.add_subplot(1, 5, 5)
+    cax5 = ax5.pcolor(rho, (eta - math.pi) / math.pi, m5[1, :-1, :-1], cmap='jet', vmin=cmin, vmax=cmax)
+
+    def animate(i):
+        cax1.set_array(m1[i + 1, :-1, :-1].flatten('C'))
+        cax2.set_array(m2[i + 1, :-1, :-1].flatten('C'))
+        cax3.set_array(m3[i + 1, :-1, :-1].flatten('C'))
+        cax4.set_array(m4[i + 1, :-1, :-1].flatten('C'))
+        cax5.set_array(m5[i + 1, :-1, :-1].flatten('C'))
+
+    fig.colorbar(cax1)
+    ax1.axvline(x=1, color='k', linestyle='--')
+    ax1.axhline(-0.5, color='w', linestyle='--')
+    ax1.axhline(0, color='w', linestyle='--')
+    ax1.axhline(0.5, color='w', linestyle='--')
+    ax2.axvline(x=1, color='k', linestyle='--')
+    ax2.axhline(-0.5, color='w', linestyle='--')
+    ax2.axhline(0, color='w', linestyle='--')
+    ax2.axhline(0.5, color='w', linestyle='--')
+    ax3.axvline(x=1, color='k', linestyle='--')
+    ax3.axhline(-0.5, color='w', linestyle='--')
+    ax3.axhline(0, color='w', linestyle='--')
+    ax3.axhline(0.5, color='w', linestyle='--')
+    ax4.axvline(x=1, color='k', linestyle='--')
+    ax4.axhline(-0.5, color='w', linestyle='--')
+    ax4.axhline(0, color='w', linestyle='--')
+    ax4.axhline(0.5, color='w', linestyle='--')
+    ax5.axvline(x=1, color='k', linestyle='--')
+    ax5.axhline(-0.5, color='w', linestyle='--')
+    ax5.axhline(0, color='w', linestyle='--')
+    ax5.axhline(0.5, color='w', linestyle='--')
+    # plt.autoscale(enable=True)
+    ax1.set_xlabel('$\\rho $')
+    ax2.set_xlabel('$\\rho $')
+    ax3.set_xlabel('$\\rho $')
+    ax4.set_xlabel('$\\rho $')
+    ax5.set_xlabel('$\\rho $')
+    ax1.set_xlim([rho_min, rho_max])
+    ax2.set_xlim([rho_min, rho_max])
+    ax3.set_xlim([rho_min, rho_max])
+    ax4.set_xlim([rho_min, rho_max])
+    ax5.set_xlim([rho_min, rho_max])
+    ylabels = ('DOWN', 'LFS', 'UP', 'HFS', 'DOWN')
+    y_pos = [-1, -0.5, 0, 0.5, 1]
+    ax1.set_yticks(y_pos)
+    ax1.set_yticklabels(ylabels)
+    ax1.set_title(title1)
+    ax2.set_yticks(y_pos)
+    ax2.set_yticklabels(ylabels)
+    ax2.set_title(title2)
+    ax3.set_yticks(y_pos)
+    ax3.set_yticklabels(ylabels)
+    ax3.set_title(title3)
+    ax4.set_yticks(y_pos)
+    ax4.set_yticklabels(ylabels)
+    ax4.set_title(title4)
+    ax5.set_yticks(y_pos)
+    ax5.set_yticklabels(ylabels)
+    ax5.set_title(title5)
+    anim = Player(fig, animate)
+    return anim
+    # plt.show()
+
+
 def radial_plot(magnitude):
+    m=filter(magnitude)
     plt.figure()
-    plt.plot(rho, magnitude[:][0])
-    plt.plot(rho, magnitude[:][480])
-    plt.plot(rho, magnitude[:][480 * 2])
-    plt.plot(rho, magnitude[:][480 * 3])
+    plt.plot(rho, m[:][0])
+    plt.plot(rho, m[:][480])
+    plt.plot(rho, m[:][480 * 2])
+    plt.plot(rho, m[:][480 * 3])
     plt.axvline(x=1, color='k', linestyle='--')
     plt.legend(['DOWN', 'LFS', 'UP', 'HFS'])
     plt.autoscale(enable=True, axis='y')
@@ -251,26 +346,35 @@ for i in range(1, t.size):
     dt_Omega_D[:][i-1] = ds['v_vort_D_2dX'][:][i] - ds['v_vort_D_2dX'][:][i - 1]
 
 dt_Omega = dt_Omega_E + dt_Omega_D
-#edge_animation_bar(dt_Omega,'dt_Omega')
-#edge_animation_bar(dt_Omega_E,'dt_Omega_E')
-#edge_animation_bar(dt_Omega_D,'dt_Omega_D')
-edge_animation_bar_2(dt_Omega_E,'dt_Omega_E', dt_Omega_D,'dt_Omega_D')
-
 
 electric_adv = ds['v_adv_E_tt_2dX'][:]
-electric_adv_main = ds['v_adv_E_main_tt_2dX'][:]
-electric_adv_alt = ds['v_adv_E_alt_tt_2dX'][:]
 dielectric_adv = ds['v_adv_D_tt_2dX'][:]
-dielectric_adv_main = ds['v_adv_D_main_tt_2dX'][:]
-dielectric_adv_alt = ds['v_adv_D_alt_tt_2dX'][:]
 advection = electric_adv + dielectric_adv
-advection_main = electric_adv_main + dielectric_adv_main
-advection_alt = electric_adv_alt + dielectric_adv_alt
 LHS = dt_Omega + advection
 
+J_par = ds['v_J_par_tt_2dX'][:]
 
+fluct_1 = ds['v_J_perp_tt_2dX'][:]
+fluct_2 = ds['v_J_mag_tt_2dX'][:]
+fluct_3 = ds['v_M_em_tt_2dX'][:]
+J_b_perp = fluct_1 + fluct_2 - fluct_3
 
+curv_1 = ds['v_J_D_divNK_tt_2dX'][:]
+curv_2 = ds['v_J_JAK_tt_2dX'][:]
+curv_3 = ds['v_J_NUK_tt_2dX'][:]
+J_curv = curv_1 + curv_2 + curv_3
+RHS=J_par+J_b_perp+J_curv
 
+edge_animation_bar_5(dt_Omega, r'$\partial_t\Omega_E$', advection, r'$-\nabla\cdot\nabla\cdot(\omega u_E)$', J_par, r'$\nabla\cdot(j_\parallel \hat{b})$',
+                     J_curv,r'$\nabla\cdot j_{curv}$', J_b_perp, r'$\nabla\cdot j_{b_\perp}$' )
+
+E_r = ds['RFB_E_r_tt_2dX'][:]
+# edge_plot(E_r)
+# plt.title(r'$E_r$')
+
+dP_dr = ds['RFB_GradPi_tt_2dX'][:]
+# edge_plot(dP_dr)
+# plt.title(r'$\partial P_i/\partial r$')
 '''
 fig = plt.figure(figsize=(16, 16))
 fig.suptitle('RHS Conservation of currents EQ')
@@ -306,27 +410,10 @@ fig.show()
 # plt.title(r'$\nabla \cdot (\nabla \cdot \omega_D u_E)$')
 # edge_plot(dielectric_adv_alt)
 # plt.title(r'$\nabla \cdot(\omega_D \cdot \nabla u_E)$')
+'''
 
 
 
-
-J_par = ds['v_J_par_tt_2dX'][:]
-
-#edge_plot(J_par, r'$\nabla \cdot (J_\parallel \hat{b})$')
-
-fluct_1 = ds['v_J_perp_tt_2dX'][:]
-fluct_2 = ds['v_J_mag_tt_2dX'][:]
-fluct_3 = ds['v_M_em_tt_2dX'][:]
-J_b_perp = fluct_1 + fluct_2 - fluct_3
-
-#edge_plot(J_b_perp, r'$\nabla \cdot J_{b_\perp}$')
-
-curv_1 = ds['v_J_D_divNK_tt_2dX'][:]
-curv_2 = ds['v_J_JAK_tt_2dX'][:]
-curv_3 = ds['v_J_NUK_tt_2dX'][:]
-J_curv = curv_1 + curv_2 + curv_3
-
-#edge_plot(J_curv, r'$\nabla \cdot J_{curv}$')
 
 #E_r = ds['RFB_E_r_tt_2dX'][:]
 # edge_plot(E_r)
@@ -336,7 +423,7 @@ J_curv = curv_1 + curv_2 + curv_3
 # edge_plot(dP_dr)
 # plt.title(r'$\partial P_i/\partial r$')
 
-
+'''
 RHS=J_par+J_b_perp+J_curv
 
 fig = plt.figure(figsize=(16, 16))
