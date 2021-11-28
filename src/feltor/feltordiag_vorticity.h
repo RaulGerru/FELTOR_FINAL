@@ -1759,6 +1759,7 @@ std::vector<Record> diagnostics2d_list = {
     },
     */
 
+    /*
     {"v_adv_par_E_tt", "Parallel advective term (time integrated)", true, //COMMENT: THIS TERM IS BY CONSTRUCTION INCOHERENT, AS WE ARE USING Ui WHEN IT ARISES FROM ASSUMING Ui!=ui, but ui is innaccesible
         []( dg::x::DVec& result, Variables& v) {//CHECKED
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp[0]);
@@ -1808,6 +1809,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::scal(result, v.p.tau[1]);
         }
     },
+    */
     {"v_EXTRA_GF_tt", "Parallel Magnetization GF term (time integrated)", true,
         []( dg::x::DVec& result, Variables& v) { //CHECKED
 			 dg::blas1::pointwiseDot(v.f.binv(), v.f.divNUb(1), v.tmp[0]);
@@ -1817,6 +1819,7 @@ std::vector<Record> diagnostics2d_list = {
 			 dg::blas1::scal(result, v.p.tau[1]*0.5);
         }
     },
+    /*
     {"v_EXTRA_GF_alt_tt", "Parallel Magnetization GF term ALTERNATIVE DEFINITION (time integrated)", true,
         []( dg::x::DVec& result, Variables& v) { //CHECKED
 			 dg::blas1::pointwiseDot(v.f.density(1), v.f.velocity(1), v.tmp[0]); //NiUi
@@ -1830,7 +1833,7 @@ std::vector<Record> diagnostics2d_list = {
 			 dg::blas1::scal(result, v.p.tau[1]*0.5);
         }
     },
-
+    */
     
  
 	///EXTRA TERMS TO TEST ADVECTION
@@ -2262,6 +2265,7 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::copy( v.f.divNUb(1), result);
         }
     },
+    /*
     {"v_J_par_alt_gf_tt", "Parallel current term alternative with GF (time integrated)", true, //FINAL
         []( dg::x::DVec& result, Variables& v) {
              dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(0), result); //neue
@@ -2312,7 +2316,7 @@ std::vector<Record> diagnostics2d_list = {
 
         }
     },
-
+    */
     /*
     {"v_J_par", "Parallel current term", false, //FINAL
         []( dg::x::DVec& result, Variables& v) {
