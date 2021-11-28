@@ -1758,6 +1758,79 @@ std::vector<Record> diagnostics2d_list = {
         }
     },
     */
+
+    {"v_adv_par_E_tt", "Parallel advective term (time integrated)", true, //COMMENT: THIS TERM IS BY CONSTRUCTION INCOHERENT, AS WE ARE USING Ui WHEN IT ARISES FROM ASSUMING Ui!=ui, but ui is innaccesible
+        []( dg::x::DVec& result, Variables& v) {//CHECKED
+			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp[0]);
+			 dg::blas1::pointwiseDot(v.tmp[0], v.f.density(0), v.tmp[0]);
+             routines::scal(v.tmp[0], v.f.gradP(0), v.tmp2); //ne Grad_phi/B^2
+             routines::scal(v.f.velocity(1), v.tmp2, v.tmp3); //ne U_i Grad_phi/B^2
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); //Div(n_e U_iGrad_phi/B^2 )
+             dg::blas1::pointwiseDivide(v.f.binv(), result, result); //Multiply by B because in next step we use bhat/B*sqrt(g)
+             routines::scal(result, v.f.bhatgB(), v.tmp);//Div(n_e  Ui Grad_phi/B^2 )*bhat/sqrt(g)
+             v.nabla.div_par(v.tmp[0], v.tmp[1], v.tmp[2], result);//Div(Div(n_e Ui Grad_phi/B^2 )*bhat)
+        }
+    },
+
+     {"v_adv_par_E_gf_tt", "Parallel GF advective term (time integrated)", true, //Comment: This term is by definition incoherent, as we are using the gyrofluid ion density, which this term does not appear on
+        []( dg::x::DVec& result, Variables& v) {//CHECKED
+			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp[0]);
+			 dg::blas1::pointwiseDot(v.tmp[0], v.f.density(1), v.tmp[0]);
+             routines::scal(v.tmp[0], v.f.gradP(0), v.tmp2); //Ni Grad_phi/B^2
+             routines::scal(v.f.velocity(1), v.tmp2, v.tmp3); //Ni U_i Grad_phi/B^2
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result); //Div(Ni U_iGrad_phi/B^2 )
+             dg::blas1::pointwiseDivide(v.f.binv(), result, result); //Multiply by B because in next step we use bhat/B*sqrt(g)
+             routines::scal(result, v.f.bhatgB(), v.tmp);//Div(Ui Ni Grad_phi/B^2 )*bhat/sqrt(g)
+             v.nabla.div_par(v.tmp[0], v.tmp[1], v.tmp[2], result);///Div(Div(Ni Ui Grad_phi/B^2 )*bhat)
+        }
+    },
+    {"v_adv_par_D_tt", "Diamagnetic parallel advective term (time integrated)", true, //comment: as incoherent as the previous ones
+        []( dg::x::DVec& result, Variables& v) { //CHECKED
+			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp[0]);
+             routines::scal(v.tmp[0], v.f.gradN(0), v.tmp2); //Grad_n_e/B^2
+             routines::scal(v.f.velocity(1), v.tmp2, v.tmp3); // U_i Grad_ne/B^2
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result);
+             dg::blas1::pointwiseDivide(v.f.binv(), result, result); //Multiply by B because in next step we use bhat/B*sqrt(g)
+             routines::scal(result, v.f.bhatgB(), v.tmp);//Div(Ui Grad_ne/B^2 )*bhat/sqrt(g)
+             v.nabla.div_par(v.tmp[0], v.tmp[1], v.tmp[2], result);//Div(Div(U_i Grad_n_e/B^2 )*bhat/sqrt(g))
+             dg::blas1::scal(result, v.p.tau[1]);
+        }
+    },
+    {"v_adv_par_gf_tt", "Diamagnetic parallel advective term GF (time integrated)", true, //comment: as incoherent as the previous
+        []( dg::x::DVec& result, Variables& v) { //CHECKED
+			 dg::blas1::pointwiseDot(v.f.binv(), v.f.binv(), v.tmp[0]);
+             routines::scal(v.tmp[0], v.f.gradN(1), v.tmp2); //Grad_Ni/B^2
+             routines::scal(v.f.velocity(1), v.tmp2, v.tmp3); // U_i Grad_Ni/B^2
+             v.nabla.div(v.tmp3[0], v.tmp3[1], result);
+             dg::blas1::pointwiseDivide(v.f.binv(), result, result); //Multiply by B because in next step we use bhat/B*sqrt(g)
+             routines::scal(result, v.f.bhatgB(), v.tmp);//Div(Ui Grad_Ni/B^2 )*bhat/sqrt(g)
+             v.nabla.div_par(v.tmp[0], v.tmp[1], v.tmp[2], result);//Div(Div(U_i Grad_Ni/B^2 )*bhat/sqrt(g))
+             dg::blas1::scal(result, v.p.tau[1]);
+        }
+    },
+    {"v_EXTRA_GF_tt", "Parallel Magnetization GF term (time integrated)", true,
+        []( dg::x::DVec& result, Variables& v) { //CHECKED
+			 dg::blas1::pointwiseDot(v.f.binv(), v.f.divNUb(1), v.tmp[0]);
+			 dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);//grad_par(NiUi)/B^2
+			 v.nabla.grad_perp_f(v.tmp[0], v.tmp[1], v.tmp[2]);
+			 v.nabla.div(v.tmp[1],v.tmp[2], result);
+			 dg::blas1::scal(result, v.p.tau[1]*0.5);
+        }
+    },
+    {"v_EXTRA_GF_alt_tt", "Parallel Magnetization GF term ALTERNATIVE DEFINITION (time integrated)", true,
+        []( dg::x::DVec& result, Variables& v) { //CHECKED
+			 dg::blas1::pointwiseDot(v.f.density(1), v.f.velocity(1), v.tmp[0]); //NiUi
+			 dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);//NiUi/B
+			 dg::blas1::pointwiseDot(v.f.binv(), v.tmp[0], v.tmp[0]);//NiUi/B^2
+			 v.nabla.grad_perp_f(v.tmp[0], v.tmp[1], v.tmp[2]);
+			 v.nabla.div(v.tmp[1],v.tmp[2], result);
+			 dg::blas1::pointwiseDivide(v.f.binv(), result, result); //Multiply by B because in next step we use bhat/B*sqrt(g)
+             routines::scal(result, v.f.bhatgB(), v.tmp);//Div(Grad_perp(Ui Ni/B^2)*bhat/sqrt(g)
+			 v.nabla.div_par(v.tmp[0],v.tmp[1], v.tmp[2], result);
+			 dg::blas1::scal(result, v.p.tau[1]*0.5);
+        }
+    },
+
     
  
 	///EXTRA TERMS TO TEST ADVECTION
@@ -2179,6 +2252,67 @@ std::vector<Record> diagnostics2d_list = {
              dg::blas1::axpby(1, v.tmp[0], -1, result);   
         }
     },
+    {"v_J_par_e_tt", "Parallel current term electrons (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+             dg::blas1::copy( v.f.divNUb(0), result);
+        }
+    },
+    {"v_J_par_i_tt", "Parallel current term ion (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+             dg::blas1::copy( v.f.divNUb(1), result);
+        }
+    },
+    {"v_J_par_alt_gf_tt", "Parallel current term alternative with GF (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+             dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(0), result); //neue
+             dg::blas1::pointwiseDot(v.f.density(1), v.f.velocity(1), v.tmp[0]); //NiUi
+             dg::blas1::axpby(1, v.tmp[0], -1, result); //neue-NiUi=J_par
+             dg::blas1::pointwiseDot(v.f.binv(), result, result); //J_par/B
+             routines::scal(result, v.f.bhatgB(), v.tmp); //J_par b/sqrt(g)
+             v.nabla.div_par(v.tmp[0], v.tmp[1], v.tmp[2], result);
+
+        }
+    },
+    {"v_J_par_alt_tt", "Parallel current term alternative (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+             dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(0), result); //neue
+             dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(1), v.tmp[0]); //NiUi
+             dg::blas1::axpby(1, v.tmp[0], -1, result); //NiUi-neue=J_par
+             dg::blas1::pointwiseDot(v.f.binv(), result, result); //J_par/B
+             routines::scal(result, v.f.bhatgB(), v.tmp); //J_par b/sqrt(g)
+             v.nabla.div_par(v.tmp[0], v.tmp[1], v.tmp[2], result);
+
+        }
+    },
+    {"v_J_par_e_alt_tt", "Parallel current term electrons (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+             dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(0), result); //neue
+             dg::blas1::pointwiseDot(v.f.binv(), result, result); //neue/B
+             routines::scal(result, v.f.bhatgB(), v.tmp); //neue b/sqrt(g)
+             v.nabla.div_par(v.tmp[0], v.tmp[1], v.tmp[2], result);
+
+        }
+    },
+
+    {"v_J_par_i_alt_gf_tt", "Parallel current term ions gf density (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+             dg::blas1::pointwiseDot(v.f.density(1), v.f.velocity(1), result); //NiUi
+             dg::blas1::pointwiseDot(v.f.binv(), result, result); //NiUi/B
+             routines::scal(result, v.f.bhatgB(), v.tmp); //NiUi b/sqrt(g)
+             v.nabla.div_par(v.tmp[0], v.tmp[1], v.tmp[2], result);
+
+        }
+    },
+    {"v_J_par_i_alt_tt", "Parallel current term ions fluid density (time integrated)", true, //FINAL
+        []( dg::x::DVec& result, Variables& v) {
+             dg::blas1::pointwiseDot(v.f.density(0), v.f.velocity(1), result); //niUi
+             dg::blas1::pointwiseDot(v.f.binv(), result, result); //niUi/B
+             routines::scal(result, v.f.bhatgB(), v.tmp); //niUi b/sqrt(g)
+             v.nabla.div_par(v.tmp[0], v.tmp[1], v.tmp[2], result);
+
+        }
+    },
+
     /*
     {"v_J_par", "Parallel current term", false, //FINAL
         []( dg::x::DVec& result, Variables& v) {

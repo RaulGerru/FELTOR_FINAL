@@ -19,7 +19,7 @@ import sys
 sys.modules[__name__].__dict__.clear()
 
 # fn="Final_Test_1X_simple_diagRaul_FINAL2.nc"
-fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/TA_test_corrected_6_diag.nc"
+fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/conservation_test_diag.nc"
 ds = nc.Dataset(fn)
 inputfile = ds.inputfile
 inputfile_json = json.loads(inputfile)
@@ -47,7 +47,7 @@ C = e * n0 * Omega_0
 rho = ds['rho'][:]
 eta = ds['eta'][:]  # Poloidal direction (from 0 to 2pi)
 t = ds['time'][:]
-t_def = 1
+t_def = 5
 time = 1e3 * ds['time'][:] / Omega_0
 density = ds['electrons_2dX'][:][t_def]
 
@@ -156,10 +156,10 @@ def edge_plot(magnitude, title, axes=None):
         ax1 = fig.add_subplot(1, 1, 1)
     else:
         ax1 = axes
-    cmin = -0.03
-    cmax = 0.05
+    #cmin = -0.03
+    #cmax = 0.05
     p = plt.pcolor(rho[(rho > rho_min) & (rho < rho_max)], (eta - math.pi) / math.pi,
-                   filter(magnitude[:, (rho > rho_min) & (rho < rho_max)]), cmap='jet',  vmin=cmin, vmax=cmax)#, shading='gouraud')
+                   filter(magnitude[:, (rho > rho_min) & (rho < rho_max)]), cmap='jet')#,  vmin=cmin, vmax=cmax)#, shading='gouraud')
     ax1.axvline(x=1, color='k', linestyle='--')
     ax1.axhline(-0.5, color='w', linestyle='--')
     ax1.axhline(0, color='w', linestyle='--')
@@ -213,14 +213,12 @@ def radial_plot(magnitude):
 rho_min = 0.6
 rho_max = 1.1
 
-data = ds['v_vort_E_2dX']
 
-
-vort_elec = ds['v_vort_E_2dX'][:][t_def] - ds['v_vort_E_2dX'][:][t_def - 1]
-vort_elec_tt = ds['v_vort_E_tt_2dX'][:][t_def] - ds['v_vort_E_tt_2dX'][:][t_def - 1]
+vort_elec = ds['v_Omega_E_2dX'][:][t_def] - ds['v_Omega_E_2dX'][:][t_def - 1]
+#vort_elec_tt = ds['v_Omega_E_tt_2dX'][:][t_def] - ds['v_Omega_E_tt_2dX'][:][t_def - 1]
 #vort_elec_alt=ds['v_vort_E_2dX'][:][t_def+1] - ds['v_vort_E_2dX'][:][t_def - 1]
-vort_dielec = ds['v_vort_D_2dX'][:][t_def] - ds['v_vort_D_2dX'][:][t_def - 1]
-vort_dielec_tt = ds['v_vort_D_tt_2dX'][:][t_def] - ds['v_vort_D_tt_2dX'][:][t_def - 1]
+vort_dielec = ds['v_Omega_D_2dX'][:][t_def] - ds['v_Omega_D_2dX'][:][t_def - 1]
+#vort_dielec_tt = ds['v_Omega_D_tt_2dX'][:][t_def] - ds['v_Omega_D_tt_2dX'][:][t_def - 1]
 #vort_dielec_alt = ds['v_vort_D_2dX'][:][t_def+1] - ds['v_vort_D_2dX'][:][t_def - 1]
 dt_Omega = vort_elec + vort_dielec
 #dt_Omega_alt= vort_elec_alt + vort_dielec_alt
@@ -272,32 +270,24 @@ fig.colorbar(p5)
 fig.show()
 
 J_par = ds['v_J_par_tt_2dX'][:][t_def]
-J_par_alt = ds['v_J_par_2dX'][:][t_def]
+#J_par_alt = ds['v_J_par_2dX'][:][t_def]
 
-fluct_1 = ds['v_J_perp_tt_2dX'][:][t_def]
+fluct_1 = ds['v_J_bperp_tt_2dX'][:][t_def]
 fluct_2 = ds['v_J_mag_tt_2dX'][:][t_def]
 fluct_3 = ds['v_M_em_tt_2dX'][:][t_def]
 J_b_perp = fluct_1 + fluct_2 - fluct_3
 
-fluct_1_alt = ds['v_J_perp_2dX'][:][t_def]
-fluct_2_alt = ds['v_J_mag_2dX'][:][t_def]
-fluct_3_alt = ds['v_M_em_2dX'][:][t_def]
-J_b_perp_alt = fluct_1_alt + fluct_2_alt - fluct_3_alt
+
 
 curv_1 = ds['v_J_D_tt_2dX'][:][t_def]
-curv_1_alt = ds['v_J_D_2dX'][:][t_def]
-#curv_1_alt = ds['v_J_D_divNK_alt_tt_2dX'][:][t_def]
-#curv_4 = ds['v_J_D_kappa_divNK_tt_2dX'][:][t_def]
-#curv_4_alt = ds['v_J_D_kappa_divNK_alt_tt_2dX'][:][t_def]
 curv_2 = ds['v_J_JAK_tt_2dX'][:][t_def]
 curv_3 = ds['v_J_NUK_tt_2dX'][:][t_def]
-curv_2_alt = ds['v_J_JAK_2dX'][:][t_def]
-curv_3_alt = ds['v_J_NUK_2dX'][:][t_def]
+
 J_curv = curv_1 + curv_2 + curv_3
-J_curv_alt = curv_1_alt + curv_2_alt + curv_3_alt
+
 
 RHS=J_par+J_b_perp+J_curv
-RHS_alt=J_par_alt+J_b_perp_alt+J_curv_alt
+
 
 fig = plt.figure(figsize=(16, 16))
 fig.suptitle('RHS Conservation of currents EQ')
