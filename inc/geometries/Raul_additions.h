@@ -135,6 +135,7 @@ struct Nablas
 	Nablas(const Geometry& geom3d, feltor::Parameters p, dg::geo::TokamakMagneticField& mag): m_g(geom3d), m_p(p), m_mag(mag) { 
 		dg::blas2::transfer( dg::create::dx( m_g, dg::DIR, dg::centered), m_dR); 
 		dg::blas2::transfer( dg::create::dy( m_g, dg::DIR, dg::centered), m_dZ);
+		dg::blas2::transfer( dg::create::dz( m_g, dg::DIR, dg::centered), m_dtor);
 		m_vol=dg::tensor::volume(m_g.metric());
 		m_weights=dg::create::volume(m_g);
 		m_tmp=m_tmp2=m_tmp3=m_tmp4=m_weights;
@@ -188,6 +189,29 @@ struct Nablas
 	
 }
 
+/**
+     * @brief Divergence of a vector field even with parallel direction (input contravariant) (Usefull for parallel divergences)
+     *
+     * @param v_R container containing the R component of the vector field
+     * @param v_Z container containing the Z component of the vector field
+     * @param v_tor container containing the toroidal component of the vector field
+     * @param F the container containing the divergence result
+     */
+	
+	template<class Container1>		
+	void div_par (const Container1& v_R, const Container1& v_Z, const Container1& v_tor, Container1& F){ //INPUT: CONTRAVARIANT
+	dg::blas1::pointwiseDivide(v_R, m_vol, m_tmp);
+	dg::blas1::pointwiseDivide(v_Z, m_vol, m_tmp2); 
+	dg::blas1::pointwiseDivide(v_tor, m_vol, m_tmp3);
+	dg::blas1::pointwiseDivide(m_tmp3, m_vol, m_tmp3); //DIVIDED TWICE BECAUSE IT WILL COME FROM bhatgb which is divided by sqrt(g), so we need to devide twice by the volume to get the right front factor.
+	dg::blas2::symv( m_dR, m_tmp, m_tmp4); 
+	dg::blas2::symv( m_dZ, m_tmp2, m_tmp5);
+	dg::blas2::symv( m_dtor, m_tmp3, m_tmp6);
+	dg::blas1::axpbypgz(1, m_tmp4, 1, m_tmp5, 1, m_tmp6);
+	dg::blas1::pointwiseDot(m_vol, m_tmp6,F);	
+	
+}
+
 	/**
      * @brief Vector dot nabla f: gradient in a vector direction (covariant) of a scalar (usually the scalar being different components of a vector)
      *
@@ -201,10 +225,17 @@ struct Nablas
 	void v_dot_nabla_f (const Container1& v_R, const Container1& v_Z, const Container1& f, Container1& F){ //INPUT: COVARIANT
 	dg::blas2::symv( m_dR, f, m_tmp);
 	dg::blas2::symv( m_dZ, f, m_tmp2);
-	//dg::tensor::multiply2d(m_hh, m_tmp, m_tmp2, m_tmp3, m_tmp4); //WE MAKE THE GRADIENT CONTRAVARIANT
-	dg::blas1::pointwiseDot(v_R, m_tmp, m_tmp3);
-	dg::blas1::pointwiseDot(v_Z, m_tmp2, F);
+	dg::tensor::multiply2d(m_hh, m_tmp, m_tmp2, m_tmp3, m_tmp4); //WE MAKE THE GRADIENT CONTRAVARIANT
+	dg::blas1::pointwiseDot(v_R, m_tmp3, m_tmp3);
+	dg::blas1::pointwiseDot(v_Z, m_tmp4, F);
 	dg::blas1::axpby(1.0, m_tmp3, 1.0, F);
+	}	
+	
+	template<class Container1>
+	void grad_perp_f (const Container1& f, Container1& F_R, Container1& F_Z){ //INPUT: COVARIANT
+	dg::blas2::symv( m_dR, f, m_tmp);
+	dg::blas2::symv( m_dZ, f, m_tmp2);
+	dg::tensor::multiply2d(m_hh, m_tmp, m_tmp2, F_R, F_Z); //WE MAKE THE GRADIENT CONTRAVARIANT
 	}	
 	
 	/*
@@ -232,10 +263,10 @@ struct Nablas
     bool m_reversed_field;
 	Matrix m_dR;
 	Matrix m_dZ;
-	Matrix m_dP;
+	Matrix m_dtor;
 	Container m_vol;
 	Container m_weights;
-    Container m_tmp, m_tmp2, m_tmp3, m_tmp4; 
+    Container m_tmp, m_tmp2, m_tmp3, m_tmp4, m_tmp5, m_tmp6; 
 };
 };//namespace geo
 }//namespace dg
