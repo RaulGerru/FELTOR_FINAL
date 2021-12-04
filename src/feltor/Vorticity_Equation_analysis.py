@@ -215,20 +215,8 @@ rho_max = 1.1
 
 
 vort_elec = ds['v_Omega_E_2dX'][:][t_def] - ds['v_Omega_E_2dX'][:][t_def - 1]
-#vort_elec_tt = ds['v_Omega_E_tt_2dX'][:][t_def] - ds['v_Omega_E_tt_2dX'][:][t_def - 1]
-#vort_elec_alt=ds['v_vort_E_2dX'][:][t_def+1] - ds['v_vort_E_2dX'][:][t_def - 1]
 vort_dielec = ds['v_Omega_D_2dX'][:][t_def] - ds['v_Omega_D_2dX'][:][t_def - 1]
-#vort_dielec_tt = ds['v_Omega_D_tt_2dX'][:][t_def] - ds['v_Omega_D_tt_2dX'][:][t_def - 1]
-#vort_dielec_alt = ds['v_vort_D_2dX'][:][t_def+1] - ds['v_vort_D_2dX'][:][t_def - 1]
 dt_Omega = vort_elec + vort_dielec
-#dt_Omega_alt= vort_elec_alt + vort_dielec_alt
-
-# edge_plot(ds['v_vort_E_2dX'][1], r'$\partial_t\Omega$')
-
-
-# edge_animation(data, '$\partial_t\Omega$')
-# edge_animation_bar(np.reshape(data, (1920, 192, 8)), time, rho, eta, '$\partial_t\Omega$')
-# edge_animation_bar(data, time, rho, eta, '$\partial_t\Omega$')
 
 
 electric_adv = ds['v_adv_E_tt_2dX'][:][t_def]
@@ -275,7 +263,7 @@ J_par = ds['v_J_par_tt_2dX'][:][t_def]
 fluct_1 = ds['v_J_bperp_tt_2dX'][:][t_def]
 fluct_2 = ds['v_J_mag_tt_2dX'][:][t_def]
 fluct_3 = ds['v_M_em_tt_2dX'][:][t_def]
-J_b_perp = fluct_1 + fluct_2 - fluct_3
+J_b_perp = -fluct_1 - fluct_2 + fluct_3
 
 
 
@@ -325,24 +313,6 @@ p4 = edge_plot(diffusion, 'diffusion', ax4)
 fig.colorbar(p4)
 #fig.tight_layout()
 fig.show()
-
-fig = plt.figure(figsize=(16, 16))
-fig.suptitle('Conservation of currents EQ')
-ax1 = fig.add_subplot(1, 4, 1)
-p1 = edge_plot(LHS, 'LHS_alt', ax1)
-fig.colorbar(p1)
-ax2 = fig.add_subplot(1, 4, 2)
-p2 = edge_plot(RHS, 'rhs_alt', ax2)
-fig.colorbar(p2)
-ax3 = fig.add_subplot(1, 4, 3)
-p3 = edge_plot(LHS-RHS, 'lhs-rhs ALT', ax3)
-fig.colorbar(p3)
-ax4 = fig.add_subplot(1, 4, 4)
-p4 = edge_plot(diffusion, 'diffusion', ax4)
-fig.colorbar(p4)
-#fig.tight_layout()
-fig.show()
-
 
 E_r = ds['RFB_E_r_tt_2dX'][:][t_def]
 

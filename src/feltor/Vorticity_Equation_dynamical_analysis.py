@@ -19,7 +19,7 @@ import sys
 sys.modules[__name__].__dict__.clear()
 
 # fn="Final_Test_1X_simple_diagRaul_FINAL2.nc"
-fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/conservation_test_diag.nc"
+fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/conservation_test_partial_gf_1+2+3_diag.nc"
 ds = nc.Dataset(fn)
 inputfile = ds.inputfile
 inputfile_json = json.loads(inputfile)
@@ -55,7 +55,7 @@ def closest(lst, K):
 def filter(data):
     for i in range(0, t.size-1):
         fft = fftpack.fft2(data[i])
-        fft[26:1894] = 0
+        fft[26:1894] = 0 #26:1894
         data[i] = fftpack.ifft2(fft).real
     return data
 
@@ -160,8 +160,8 @@ def edge_plot(magnitude, title, axes=None):
         ax1 = fig.add_subplot(1, 1, 1)
     else:
         ax1 = axes
-    #cmin = -0.03
-    #cmax = 0.05
+    cmin = -0.03
+    cmax = 0.05
     p = plt.pcolor(rho[(rho > rho_min) & (rho < rho_max)], (eta - math.pi) / math.pi,
                    filter_image(magnitude[:, (rho > rho_min) & (rho < rho_max)]), cmap='jet')#,  vmin=cmin, vmax=cmax)#, shading='gouraud')
     ax1.axvline(x=1, color='k', linestyle='--')
@@ -175,6 +175,7 @@ def edge_plot(magnitude, title, axes=None):
     ax1.set_yticks(y_pos)
     ax1.set_yticklabels(ylabels)
     ax1.set_title(title)
+    plt.colorbar()
     return p
 
 
@@ -338,6 +339,8 @@ def radial_plot(magnitude):
     plt.autoscale(enable=True, axis='y')
     plt.xlim([rho_min, rho_max])
 
+def time_average(magnitude):
+    return np.mean(magnitude, axis=0)
 
 rho_min = 0.6
 rho_max = 1.1
@@ -345,12 +348,19 @@ rho_max = 1.1
 
 dt_Omega_E=ds['v_Omega_E_2dX'][:]
 dt_Omega_E_gf=ds['v_Omega_E_gf_2dX'][:]
+dt_Omega_E_TK=ds['v_Omega_E_cta2d'][:]
+dt_Omega_E_TK_fluct=ds['v_Omega_E_fluc2d'][:]
+dt_Omega_E_TK=ds['v_Omega_E_gf_cta2d'][:]
+dt_Omega_E_TK_fluct=ds['v_Omega_E_gf_fluc2d'][:]
+dt_Omega_E_gf=ds['v_Omega_E_gf_2dX'][:]
 dt_Omega_E_fsa=ds['v_Omega_E_fsa'][:]
 dt_Omega_E_gf_fsa=ds['v_Omega_E_gf_fsa'][:]
 dt_Omega_D=ds['v_Omega_D_2dX'][:]
 dt_Omega_D_gf=ds['v_Omega_D_gf_2dX'][:]
 dt_Omega_D_fsa=ds['v_Omega_D_fsa'][:]
 dt_Omega_D_gf_fsa=ds['v_Omega_D_gf_fsa'][:]
+dt_Omega_D_TK=ds['v_Omega_D_cta2d'][:]
+dt_Omega_D_TK_fluct=ds['v_Omega_D_fluc2d'][:]
 
 for i in range(1, t.size):
     dt_Omega_E[:][i-1] = ds['v_Omega_E_2dX'][:][i] - ds['v_Omega_E_2dX'][:][i - 1]
@@ -361,40 +371,73 @@ for i in range(1, t.size):
     dt_Omega_D_fsa[:][i - 1] = ds['v_Omega_D_fsa'][:][i] - ds['v_Omega_D_fsa'][:][i - 1]
     dt_Omega_E_gf_fsa[:][i - 1] = ds['v_Omega_E_gf_fsa'][:][i] - ds['v_Omega_E_gf_fsa'][:][i - 1]
     dt_Omega_D_gf_fsa[:][i - 1] = ds['v_Omega_D_gf_fsa'][:][i] - ds['v_Omega_D_gf_fsa'][:][i - 1]
+    dt_Omega_E_TK[:][i - 1] = ds['v_Omega_E_cta2d'][:][i] - ds['v_Omega_E_cta2d'][:][i - 1]
+    dt_Omega_D_TK[:][i - 1] = ds['v_Omega_D_cta2d'][:][i] - ds['v_Omega_D_cta2d'][:][i - 1]
+    #dt_Omega_E_TK_gf[:][i - 1] = ds['v_Omega_E_gf_cta2d'][:][i] - ds['v_Omega_E_gf_cta2d'][:][i - 1]
+    #dt_Omega_D_TK_gf[:][i - 1] = ds['v_Omega_D_gf_cta2d'][:][i] - ds['v_Omega_D_gf_cta2d'][:][i - 1]
+    dt_Omega_E_TK_fluct[:][i - 1] = ds['v_Omega_E_fluc2d'][:][i] - ds['v_Omega_E_fluc2d'][:][i - 1]
+    dt_Omega_D_TK_fluct[:][i - 1] = ds['v_Omega_D_fluc2d'][:][i] - ds['v_Omega_D_fluc2d'][:][i - 1]
 
+dt_Omega_E_ta=time_average(dt_Omega_E)
+dt_Omega_D_ta=time_average(dt_Omega_D)
+dt_Omega_E_gf_ta=time_average(dt_Omega_E_gf)
+dt_Omega_D_gf_ta=time_average(dt_Omega_D_gf)
 dt_Omega = dt_Omega_E + dt_Omega_D
 dt_Omega_fsa = dt_Omega_E_fsa + dt_Omega_D_fsa
 dt_Omega_gf = dt_Omega_E_gf + dt_Omega_D_gf
 dt_Omega_gf_fsa = dt_Omega_E_gf_fsa + dt_Omega_D_gf_fsa
+#dt_Omega_TK=dt_Omega_E_TK+dt_Omega_D_TK
+#dt_Omega_TK_gf=dt_Omega_E_TK_gf+dt_Omega_D_TK_gf
 
 #edge_animation_bar_2(dt_Omega, 'dt_Omega', dt_Omega_gf, 'dt_Omega_gf')
 
 
 electric_adv = ds['v_adv_E_tt_2dX'][:]
 dielectric_adv = ds['v_adv_D_tt_2dX'][:]
+electric_adv_TK = ds['v_adv_E_tt_cta2d'][:]
+dielectric_adv_TK = ds['v_adv_D_tt_cta2d'][:]
+electric_adv_TK_gf = ds['v_adv_E_gf_tt_cta2d'][:]
+dielectric_adv_TK_gf = ds['v_adv_D_gf_tt_cta2d'][:]
 electric_adv_gf = ds['v_adv_E_gf_tt_2dX'][:]
 dielectric_adv_gf = ds['v_adv_D_gf_tt_2dX'][:]
 electric_adv_fsa = ds['v_adv_E_tt_fsa'][:]
 dielectric_adv_fsa = ds['v_adv_D_tt_fsa'][:]
 electric_adv_gf_fsa = ds['v_adv_E_gf_tt_fsa'][:]
 dielectric_adv_gf_fsa = ds['v_adv_D_gf_tt_fsa'][:]
+
+e_adv_ta=time_average(electric_adv)
+d_adv_ta=time_average(dielectric_adv)
+e_adv_gf_ta=time_average(electric_adv_gf)
+d_adv_gf_ta=time_average(dielectric_adv_gf)
+extra_gf = ds['v_EXTRA_GF_tt_2dX'][:]
+extra_gf_fsa = ds['v_EXTRA_GF_tt_fsa'][:]
+extra_gf_ta=np.mean(extra_gf, axis=0)
+
+#edge_animation_bar(extra_gf, 'EXTRA GF TERM')
+
 advection = electric_adv + dielectric_adv
+advection_TK = electric_adv_TK + dielectric_adv_TK
 advection_gf = electric_adv_gf + dielectric_adv_gf
 advection_fsa = electric_adv_fsa + dielectric_adv_fsa
 advection_gf_fsa = electric_adv_gf_fsa + dielectric_adv_gf_fsa
 LHS = dt_Omega + advection
-LHS_gf = dt_Omega_gf + advection_gf
+#LHS_TK = dt_Omega_TK + advection_TK
+#LHS_TK_gf = dt_Omega_TK_gf + advection_TK_gf
+LHS_gf = dt_Omega_gf + advection_gf + extra_gf
 LHS_fsa = dt_Omega_fsa + advection_fsa
-LHS_gf_fsa = dt_Omega_gf_fsa + advection_gf_fsa
+LHS_gf_fsa = dt_Omega_gf_fsa + advection_gf_fsa + extra_gf_fsa
 
+#LHS_TK = dt_Omega_TK + advection_TK
 LHS_fsa_ta=np.mean(LHS_fsa, axis=0)
 LHS_gf_fsa_ta=np.mean(LHS_gf_fsa, axis=0)
-
+LHS_gf_ta=np.mean(LHS_gf, axis=0)
+LHS_ta=np.mean(LHS, axis=0)
 
 #edge_animation_bar_2(LHS, 'LHS', LHS_gf, 'LHS_gf')
 
 
 J_par = ds['v_J_par_tt_2dX'][:]
+J_par_TK = ds['v_J_par_tt_cta2d'][:]
 J_par_fsa = ds['v_J_par_tt_fsa'][:]
 
 J_par_fsa_ta=np.mean(J_par_fsa, axis=0)
@@ -402,6 +445,9 @@ J_par_fsa_ta=np.mean(J_par_fsa, axis=0)
 fluct_1 = ds['v_J_bperp_tt_2dX'][:]
 fluct_2 = ds['v_J_mag_tt_2dX'][:]
 fluct_3 = ds['v_M_em_tt_2dX'][:]
+fluct_1_TK = ds['v_J_bperp_tt_cta2d'][:]
+fluct_2_TK = ds['v_J_mag_tt_cta2d'][:]
+fluct_3_TK = ds['v_M_em_tt_cta2d'][:]
 fluct_1_gf = ds['v_J_bperp_gf_tt_2dX'][:]
 fluct_2_gf = ds['v_J_mag_gf_tt_2dX'][:]
 fluct_3_gf = ds['v_M_em_gf_tt_2dX'][:]
@@ -411,14 +457,18 @@ fluct_3_fsa = ds['v_M_em_tt_fsa'][:]
 fluct_1_gf_fsa = ds['v_J_bperp_gf_tt_fsa'][:]
 fluct_2_gf_fsa = ds['v_J_mag_gf_tt_fsa'][:]
 fluct_3_gf_fsa = ds['v_M_em_gf_tt_fsa'][:]
-J_b_perp = fluct_1 + fluct_2 - fluct_3
-J_b_perp_gf = fluct_1_gf + fluct_2_gf - fluct_3_gf
-J_b_perp_fsa = fluct_1_fsa + fluct_2_fsa - fluct_3_fsa
-J_b_perp_gf_fsa = fluct_1_gf_fsa + fluct_2_gf_fsa - fluct_3_gf_fsa
+J_b_perp = -fluct_1 - fluct_2 + fluct_3
+J_b_perp_TK = -fluct_1_TK - fluct_2_TK + fluct_3_TK
+J_b_perp_gf = -fluct_1_gf - fluct_2_gf + fluct_3_gf
+J_b_perp_fsa = -fluct_1_fsa - fluct_2_fsa + fluct_3_fsa
+J_b_perp_gf_fsa = -fluct_1_gf_fsa - fluct_2_gf_fsa + fluct_3_gf_fsa
 
 curv_1 = ds['v_J_D_tt_2dX'][:]
 curv_2 = ds['v_J_JAK_tt_2dX'][:]
 curv_3 = ds['v_J_NUK_tt_2dX'][:]
+curv_1_TK = ds['v_J_D_tt_cta2d'][:]
+curv_2_TK = ds['v_J_JAK_tt_cta2d'][:]
+curv_3_TK = ds['v_J_NUK_tt_cta2d'][:]
 curv_1_gf = ds['v_J_D_gf_tt_2dX'][:]
 curv_2_gf = ds['v_J_JAK_gf_tt_2dX'][:]
 curv_3_gf = ds['v_J_NUK_gf_tt_2dX'][:]
@@ -429,6 +479,7 @@ curv_1_gf_fsa = ds['v_J_D_gf_tt_fsa'][:]
 curv_2_gf_fsa = ds['v_J_JAK_gf_tt_fsa'][:]
 curv_3_gf_fsa = ds['v_J_NUK_gf_tt_fsa'][:]
 J_curv = curv_1 + curv_2 + curv_3
+J_curv_TK = curv_1_TK + curv_2_TK + curv_3_TK
 J_curv_gf = curv_1_gf + curv_2_gf + curv_3_gf
 J_curv_fsa = curv_1_fsa + curv_2_fsa + curv_3_fsa
 J_curv_gf_fsa = curv_1_gf_fsa + curv_2_gf_fsa + curv_3_gf_fsa
@@ -438,10 +489,13 @@ J_curv_gf_fsa_ta=np.mean(J_curv_gf_fsa, axis=0)
 
 
 RHS=J_par+J_b_perp+J_curv
+RHS_TK=J_par_TK+J_b_perp_TK+J_curv_TK
 RHS_gf=J_par+J_b_perp_gf+J_curv_gf
 RHS_fsa=J_par_fsa+J_b_perp_fsa+J_curv_fsa
 RHS_gf_fsa=J_par_fsa+J_b_perp_gf_fsa+J_curv_gf_fsa
 
+RHS_gf_ta=np.mean(RHS_gf, axis=0)
+RHS_ta=np.mean(RHS, axis=0)
 RHS_fsa_ta=np.mean(RHS_fsa, axis=0)
 RHS_gf_fsa_ta=np.mean(RHS_gf_fsa, axis=0)
 
@@ -485,21 +539,6 @@ fig.show()
 
 
 
-#edge_plot(electric_adv, r'$\nabla \cdot \nabla \cdot (\omega_E u_E)$')
-# edge_plot(electric_adv_main)
-# plt.title(r'$\nabla \cdot (\nabla \cdot \omega_E u_E)$')
-# edge_plot(electric_adv_alt)
-# plt.title(r'$\nabla \cdot(\omega_E \cdot \nabla u_E)$')
-
-#edge_plot(dielectric_adv, r'$\nabla \cdot \nabla \cdot (\omega_D u_E)$')
-# edge_plot(dielectric_adv_main)
-# plt.title(r'$\nabla \cdot (\nabla \cdot \omega_D u_E)$')
-# edge_plot(dielectric_adv_alt)
-# plt.title(r'$\nabla \cdot(\omega_D \cdot \nabla u_E)$')
-'''
-
-
-
 
 #E_r = ds['RFB_E_r_tt_2dX'][:]
 # edge_plot(E_r)
@@ -509,7 +548,7 @@ fig.show()
 # edge_plot(dP_dr)
 # plt.title(r'$\partial P_i/\partial r$')
 
-'''
+
 RHS=J_par+J_b_perp+J_curv
 
 fig = plt.figure(figsize=(16, 16))
