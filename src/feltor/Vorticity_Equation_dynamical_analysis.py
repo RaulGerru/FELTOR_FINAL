@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Apr 12 16:41:10 2021
-ANALYSIS PROGRAM FOR VORTICITY EQUATION IN FELTOR: 
+ANALYSIS PROGRAM FOR CONSERVATION OF CURRENTS EQUATION IN FELTOR:
 @author: raulgerru
 """
 
@@ -18,8 +18,12 @@ import sys
 
 sys.modules[__name__].__dict__.clear()
 
-# fn="Final_Test_1X_simple_diagRaul_FINAL2.nc"
-fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/conservation_test_partial_gf_1+2+3_diag.nc"
+
+
+#fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Diag_test_files/conservation_test_partial_gf_1+2+3_diag.nc"
+#fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Sheath tests/conservation_sheath_1+2+3_diag.nc"
+#fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Sheath tests/sheath_test_LCFS_025_0_diag.nc"
+fn = "/home/raulgerru/Desktop/PhD files/Research/FELTOR/SIMULATIONS/Sheath tests/sheath_test_010_pen0_diag.nc"
 ds = nc.Dataset(fn)
 inputfile = ds.inputfile
 inputfile_json = json.loads(inputfile)
@@ -52,18 +56,29 @@ time = 1e3 * ds['time'][:] / Omega_0
 def closest(lst, K):
     return lst[min(range(len(lst)), key=lambda i: abs(lst[i] - K))]
 
-def filter(data):
-    for i in range(0, t.size-1):
-        fft = fftpack.fft2(data[i])
-        fft[26:1894] = 0 #26:1894
-        data[i] = fftpack.ifft2(fft).real
+def pol_shift(f):
+    k=f
+    trans = list(k)
+    new = trans[-180:] + trans[:-180]
+    data = np.stack(new)
     return data
 
+def filter(F):
+    dat = F
+    for i in range(0, t.size-1):
+        dat[i]=pol_shift(dat[i])
+        fft = fftpack.fft2(dat[i])
+        fft[23:1897] = 0 #26:1894
+        dat[i] = fftpack.ifft2(fft).real
+    return dat
+
 def filter_image(data):
-    fft = fftpack.fft2(data)
+    dat=data
+    dat = pol_shift(dat)
+    fft = fftpack.fft2(dat)
     fft[26:1894] = 0
-    data = fftpack.ifft2(fft).real
-    return data
+    dat = fftpack.ifft2(fft).real
+    return dat
 
 
 class Player(FuncAnimation):
@@ -154,23 +169,25 @@ class Player(FuncAnimation):
     def update(self, i):
         self.slider.set_val(i)
 
-def edge_plot(magnitude, title, axes=None):
+
+
+def edge_plot(magnitude, title, cmin=None, cmax=None, axes=None ):
     if axes is None:
         fig = plt.figure()
         ax1 = fig.add_subplot(1, 1, 1)
     else:
         ax1 = axes
-    cmin = -0.03
-    cmax = 0.05
+    #cmin = -0.05
+    #cmax = 0.05
     p = plt.pcolor(rho[(rho > rho_min) & (rho < rho_max)], (eta - math.pi) / math.pi,
-                   filter_image(magnitude[:, (rho > rho_min) & (rho < rho_max)]), cmap='jet')#,  vmin=cmin, vmax=cmax)#, shading='gouraud')
+                   filter_image(magnitude[:, (rho > rho_min) & (rho < rho_max)]), cmap='jet',  vmin=cmin, vmax=cmax)#, shading='gouraud')
     ax1.axvline(x=1, color='k', linestyle='--')
     ax1.axhline(-0.5, color='w', linestyle='--')
     ax1.axhline(0, color='w', linestyle='--')
     ax1.axhline(0.5, color='w', linestyle='--')
     ax1.autoscale(enable=True)
     ax1.set_xlabel('$\\rho $')
-    ylabels = ('DOWN', 'LFS', 'UP', 'HFS', 'DOWN')
+    ylabels = ('X-DOWN', 'OMP', 'UP', 'HFS', 'X-DOWN')
     y_pos = [-1, -0.5, 0, 0.5, 1]
     ax1.set_yticks(y_pos)
     ax1.set_yticklabels(ylabels)
@@ -179,11 +196,12 @@ def edge_plot(magnitude, title, axes=None):
     return p
 
 
-def edge_animation_bar(magnitude, title):
+def edge_animation_bar(magnitude, title, cmin=None, cmax=None ):
     m=filter(magnitude)
     fig, ax = plt.subplots()
-
-    cax = ax.pcolor(rho, (eta - math.pi) / math.pi, m[1, :-1, :-1], cmap='jet')
+    #cmin = -1
+    #cmax = 1
+    cax = ax.pcolor(rho, (eta - math.pi) / math.pi, m[1, :-1, :-1], cmap='jet',  vmin=cmin, vmax=cmax)
 
     def animate(i):
         cax.set_array(m[i + 1, :-1, :-1].flatten('C'))
@@ -192,9 +210,10 @@ def edge_animation_bar(magnitude, title):
     plt.axhline(-0.5, color='w', linestyle='--')
     plt.axhline(0, color='w', linestyle='--')
     plt.axhline(0.5, color='w', linestyle='--')
+    plt.xlim(rho_min,  rho_max)
     plt.xlabel('$\\rho $')
     #plt.xlim([rho_min, rho_max])
-    ylabels = ('DOWN', 'LFS', 'UP', 'HFS', 'DOWN')
+    ylabels = ('X-DOWN', 'OMP', 'UP', 'HFS', 'X-DOWN')
     y_pos = [-1, -0.5, 0, 0.5, 1]
     plt.yticks(y_pos, ylabels)
     plt.title(title)
@@ -233,7 +252,7 @@ def edge_animation_bar_2(magnitude1, title1, magnitude2, title2):
         ax2.set_xlabel('$\\rho $')
         ax1.set_xlim([rho_min, rho_max])
         ax2.set_xlim([rho_min, rho_max])
-        ylabels = ('DOWN', 'LFS', 'UP', 'HFS', 'DOWN')
+        ylabels = ('X-DOWN', 'OMP', 'UP', 'HFS', 'X-DOWN')
         y_pos = [-1, -0.5, 0, 0.5, 1]
         ax1.set_yticks(y_pos)
         ax1.set_yticklabels(ylabels)
@@ -305,7 +324,7 @@ def edge_animation_bar_5(magnitude1, title1, magnitude2, title2, magnitude3, tit
     ax3.set_xlim([rho_min, rho_max])
     ax4.set_xlim([rho_min, rho_max])
     ax5.set_xlim([rho_min, rho_max])
-    ylabels = ('DOWN', 'LFS', 'UP', 'HFS', 'DOWN')
+    ylabels = ('X-DOWN', 'OMP', 'UP', 'HFS', 'X-DOWN')
     y_pos = [-1, -0.5, 0, 0.5, 1]
     ax1.set_yticks(y_pos)
     ax1.set_yticklabels(ylabels)
